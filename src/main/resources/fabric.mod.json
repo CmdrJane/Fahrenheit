@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "fahrenheit",
   "version": "${version}",
 
-  "name": "Example Mod",
+  "name": "Fahrenheit",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "Me!"
@@ -19,11 +19,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "ru.aiefu.fahrenheit.Fahrenheit"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "fahrenheit.mixins.json"
   ],
 
   "depends": {
