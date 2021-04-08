@@ -12,7 +12,7 @@ import ru.aiefu.fahrenheit.IPlayerMixins;
 public class PlayerEntityMixins implements IPlayerMixins {
 	private EnvironmentManager enviroManager = new EnvironmentManager();
 
-	@Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/entity/player/HungerManager.update(Lnet/minecraft/entity/player/PlayerEntity;)V"))
+	@Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/entity/player/HungerManager.update(Lnet/minecraft/entity/player/PlayerEntity;)V", shift = At.Shift.AFTER))
 	private void tickEnvironmentManager(CallbackInfo info) {
 		this.enviroManager.tick((PlayerEntity) (Object) this);
 	}
