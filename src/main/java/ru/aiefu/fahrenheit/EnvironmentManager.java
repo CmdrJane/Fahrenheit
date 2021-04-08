@@ -9,6 +9,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,12 +47,13 @@ public class EnvironmentManager {
             float biomeTemp = player.world.getBiome(playerPos).getTemperature();
             Registry<DimensionType> dimTypeReg = player.world.getRegistryManager().getDimensionTypes();
             DimensionType playerDim = player.world.getDimension();
+            Collection<StatusEffectInstance> playerStatuses = player.getStatusEffects();
 
 
-            if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !Utils.containsEffectType(player.getStatusEffects(), Fahrenheit.CHILL_EFFECT)){
+            if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !Utils.containsEffectType(playerStatuses, Fahrenheit.CHILL_EFFECT)){
                 player.addStatusEffect(DEADLY_HEAT);
             }
-            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && Utils.containsEffectType(player.getStatusEffects(), Fahrenheit.WARM_EFFECT)){
+            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && Utils.containsEffectType(playerStatuses, Fahrenheit.WARM_EFFECT)){
                 player.addStatusEffect(DEADLY_COLD);
             }
             else if(this.temp > 8 && this.temp < 15){
@@ -96,7 +98,7 @@ public class EnvironmentManager {
                 }
             }
 
-            if (player.isWet()) {
+            if (player.isWet() && !Utils.containsEffectType(playerStatuses, Fahrenheit.WARM_EFFECT)) {
                 player.addStatusEffect(WET_EFFECT);
                 this.tempProgress -= 0.05F;
             }
@@ -104,7 +106,7 @@ public class EnvironmentManager {
             Map<Identifier, Runnable> blocks = new HashMap<>();
             blocks.put(Registry.BLOCK.getId(Blocks.LAVA), () -> {System.out.println("It's Worked");
             });
-            for(BlockPos pos : BlockPos.iterateOutwards(playerPos, 6,4,6)){
+            for(BlockPos pos : BlockPos.iterateOutwards(playerPos, 4,3,4)){
                 Identifier id = Registry.BLOCK.getId(player.world.getBlockState(pos).getBlock());
                 if(blocks.containsKey(id)){
                     blocks.get(id).run();

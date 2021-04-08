@@ -17,6 +17,6 @@ public class WarmEffect extends StatusEffect {
 
     @Override
     public boolean canApplyUpdateEffect(int duration, int amplifier) {
-        return super.canApplyUpdateEffect(duration, amplifier);
+        return true;
     }
 }

@@ -7,4 +7,9 @@ public class HeatEffect extends StatusEffect {
     public HeatEffect() {
         super(StatusEffectType.NEUTRAL, 5);
     }
+
+    @Override
+    public boolean canApplyUpdateEffect(int duration, int amplifier) {
+        return true;
+    }
 }

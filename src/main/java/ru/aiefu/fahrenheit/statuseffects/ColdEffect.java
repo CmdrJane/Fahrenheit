@@ -7,4 +7,9 @@ public class ColdEffect extends StatusEffect {
     public ColdEffect() {
         super(StatusEffectType.NEUTRAL, 1);
     }
+
+    @Override
+    public boolean canApplyUpdateEffect(int duration, int amplifier) {
+        return true;
+    }
 }
