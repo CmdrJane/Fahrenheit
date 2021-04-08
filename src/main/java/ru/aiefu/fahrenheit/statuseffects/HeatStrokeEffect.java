@@ -18,9 +18,9 @@ public class HeatStrokeEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity && !Utils.containsEffectType(entity.getStatusEffects(), Fahrenheit.CHILL_EFFECT)){
-            entity.applyStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3));
-            entity.applyStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 5));
+        if(entity instanceof PlayerEntity && !entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
+            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3));
+            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 5));
             Difficulty diff = entity.world.getDifficulty();
             if(diff == Difficulty.NORMAL && entity.getHealth() > 1.0F) {
                 entity.damage(DamageSource.GENERIC, 0.5F);

@@ -18,8 +18,8 @@ public class Hypothermia extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity && !Utils.containsEffectType(entity.getStatusEffects(), Fahrenheit.WARM_EFFECT)) {
-            entity.applyStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3));
+        if(entity instanceof PlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)) {
+            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3));
             Difficulty diff = entity.world.getDifficulty();
             if(diff == Difficulty.NORMAL && entity.getHealth() > 1.0F) {
                 entity.damage(DamageSource.GENERIC, 1.0F);

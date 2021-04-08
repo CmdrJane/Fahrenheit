@@ -14,7 +14,7 @@ public class DeadlyHeatEffect extends StatusEffect {
     }
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity && !Utils.containsEffectType(entity.getStatusEffects(), Fahrenheit.CHILL_EFFECT)){
+        if(entity instanceof PlayerEntity && !entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
             entity.damage(DamageSource.GENERIC, 2.0F);
         }
     }

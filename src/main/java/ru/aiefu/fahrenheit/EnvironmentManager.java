@@ -47,13 +47,11 @@ public class EnvironmentManager {
             float biomeTemp = player.world.getBiome(playerPos).getTemperature();
             Registry<DimensionType> dimTypeReg = player.world.getRegistryManager().getDimensionTypes();
             DimensionType playerDim = player.world.getDimension();
-            Collection<StatusEffectInstance> playerStatuses = player.getStatusEffects();
 
-
-            if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !Utils.containsEffectType(playerStatuses, Fahrenheit.CHILL_EFFECT)){
+            if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !player.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
                 player.addStatusEffect(DEADLY_HEAT);
             }
-            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && Utils.containsEffectType(playerStatuses, Fahrenheit.WARM_EFFECT)){
+            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && !player.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
                 player.addStatusEffect(DEADLY_COLD);
             }
             else if(this.temp > 8 && this.temp < 15){
@@ -98,7 +96,7 @@ public class EnvironmentManager {
                 }
             }
 
-            if (player.isWet() && !Utils.containsEffectType(playerStatuses, Fahrenheit.WARM_EFFECT)) {
+            if (player.isWet() && !player.hasStatusEffect(Fahrenheit.WARM_EFFECT)) {
                 player.addStatusEffect(WET_EFFECT);
                 this.tempProgress -= 0.05F;
             }
