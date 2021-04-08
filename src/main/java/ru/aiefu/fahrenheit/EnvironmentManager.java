@@ -100,6 +100,9 @@ public class EnvironmentManager {
                 player.addStatusEffect(WET_EFFECT);
                 this.tempProgress -= 0.05F;
             }
+            if(player.getEyeY() >= 170){
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.THIN_AIR, 15));
+            }
 
             Map<Identifier, Runnable> blocks = new HashMap<>();
             blocks.put(Registry.BLOCK.getId(Blocks.LAVA), () -> {System.out.println("It's Worked");

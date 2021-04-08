@@ -1,8 +1,8 @@
 package ru.aiefu.fahrenheit;
 
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import ru.aiefu.fahrenheit.statuseffects.*;
@@ -20,6 +20,13 @@ public class Fahrenheit implements ModInitializer {
 	public static final StatusEffect HEAT_EFFECT = new HeatEffect();
 	public static final StatusEffect DEADLY_COLD_EFFECT = new DeadlyColdEffect();
 	public static final StatusEffect DEADLY_HEAT_EFFECT = new DeadlyHeatEffect();
+	public static final StatusEffect THIN_AIR = new ThinAirEffect();
+	//DamageSources
+	public static final DamageSource OUT_OF_AIR = new DamageSourcesCustom("out_or_air_source").setBypassesArmor();
+	public static final DamageSource HYPOTHERMIA_DMG = new DamageSourcesCustom("hypothermia_source").setBypassesArmor();
+	public static final DamageSource HEAT_STROKE_DMG = new DamageSourcesCustom("heat_stroke_source").setBypassesArmor();
+	public static final DamageSource DEADLY_HEAT_DMG = new DamageSourcesCustom("deadly_heat_source").setBypassesArmor();
+	public static final DamageSource DEADLY_COLD_DMG = new DamageSourcesCustom("deadly_cold_source").setBypassesArmor();
 
 	@Override
 	public void onInitialize() {
@@ -32,6 +39,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("heat"), HEAT_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_cold"), DEADLY_COLD_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_heat"), DEADLY_HEAT_EFFECT);
+		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
 	}
 	public Identifier craftID(String id){
 		return new Identifier(MOD_ID, id);

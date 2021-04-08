@@ -4,9 +4,10 @@
   "package": "ru.aiefu.fahrenheit.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "LivingEntityMixins",
+    "PlayerEntityMixins"
   ],
   "client": [
-    "PlayerEntityMixins"
   ],
   "injectors": {
     "defaultRequire": 1

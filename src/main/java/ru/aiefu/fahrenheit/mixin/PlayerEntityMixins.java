@@ -1,6 +1,5 @@
 package ru.aiefu.fahrenheit.mixin;
 
-import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
