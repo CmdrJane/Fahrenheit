@@ -17,7 +17,8 @@ public class ThinAirEffect extends StatusEffect {
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
         ++this.timer;
         if(this.timer >= 20 && entity instanceof PlayerEntity && !entity.isSubmergedInWater() && entity.getEyeY() >= 170.0D){
-            entity.setAir(entity.getAir() -3);
+            int f = (int) ((entity.getEyeY() - 170.0D) * 0.1D);
+            entity.setAir(entity.getAir() -(2 + f));
             this.timer = 0;
             if(entity.getAir() < -20) {
                 entity.setAir(-20);

@@ -18,16 +18,6 @@ public class EnvironmentManager {
     private float tempProgress = 0;
     private int tickTimer = 0;
 
-    //StatusEffectsInstances
-    public static final StatusEffectInstance WET_EFFECT = new StatusEffectInstance(Fahrenheit.WET_EFFECT, 5);
-    public static final StatusEffectInstance HEAT_STROKE = new StatusEffectInstance(Fahrenheit.HEAT_STROKE, 1);
-    public static final StatusEffectInstance HYPOTHERMIA = new StatusEffectInstance(Fahrenheit.HYPOTHERMIA, 1);
-    public static final StatusEffectInstance COLD_EFFECT = new StatusEffectInstance(Fahrenheit.COLD_EFFECT, 1);
-    public static final StatusEffectInstance HEAT_EFFECT = new StatusEffectInstance(Fahrenheit.HEAT_EFFECT, 1);
-    public static final StatusEffectInstance DEADLY_COLD = new StatusEffectInstance(Fahrenheit.DEADLY_COLD_EFFECT, 1);
-    public static final StatusEffectInstance DEADLY_HEAT = new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 1);
-
-
     public void tick(PlayerEntity player){
         ++tickTimer;
 
@@ -49,22 +39,22 @@ public class EnvironmentManager {
             DimensionType playerDim = player.world.getDimension();
 
             if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !player.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
-                player.addStatusEffect(DEADLY_HEAT);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
             }
             else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && !player.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
-                player.addStatusEffect(DEADLY_COLD);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_COLD_EFFECT, 15));
             }
             else if(this.temp > 8 && this.temp < 15){
-                player.addStatusEffect(HEAT_EFFECT);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.HEAT_EFFECT, 15));
             }
             else if(this.temp >= 15){
-                player.addStatusEffect(HEAT_STROKE);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.HEAT_STROKE, 15));
             }
             else if(this.temp < -8 && this.temp > -15){
-                player.addStatusEffect(COLD_EFFECT);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.COLD_EFFECT, 15));
             }
             else if(this.temp <= -15){
-                player.addStatusEffect(HYPOTHERMIA);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.HYPOTHERMIA, 15));
             }
 
             if(biomeTemp <= 0.20 && biomeTemp < 0.4F){
@@ -97,7 +87,7 @@ public class EnvironmentManager {
             }
 
             if (player.isWet() && !player.hasStatusEffect(Fahrenheit.WARM_EFFECT)) {
-                player.addStatusEffect(WET_EFFECT);
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.WET_EFFECT, 60));
                 this.tempProgress -= 0.05F;
             }
             if(player.getEyeY() >= 170){
