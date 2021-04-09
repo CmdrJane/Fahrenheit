@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import ru.aiefu.fahrenheit.Fahrenheit;
 import ru.aiefu.fahrenheit.IPlayerMixins;
 
@@ -14,7 +15,7 @@ public class WetEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
+        if(entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
             ((PlayerEntity) entity).addExhaustion(0.05F);
         }
         else if(entity instanceof PlayerEntity && entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){

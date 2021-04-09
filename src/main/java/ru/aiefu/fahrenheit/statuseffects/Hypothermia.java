@@ -7,9 +7,9 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.Difficulty;
 import ru.aiefu.fahrenheit.Fahrenheit;
-import ru.aiefu.fahrenheit.Utils;
 
 public class Hypothermia extends StatusEffect {
     public Hypothermia() {
@@ -18,8 +18,8 @@ public class Hypothermia extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)) {
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 3));
+        if(entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)) {
+            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 15));
             Difficulty diff = entity.world.getDifficulty();
             if(diff == Difficulty.NORMAL && entity.getHealth() > 1.0F) {
                 entity.damage(DamageSource.GENERIC, 1.0F);

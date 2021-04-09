@@ -5,6 +5,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import ru.aiefu.fahrenheit.Fahrenheit;
 import ru.aiefu.fahrenheit.Utils;
 
@@ -15,7 +16,7 @@ public class DeadlyColdEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
+        if(entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
             entity.damage(DamageSource.GENERIC, 2.0F);
         }
     }
