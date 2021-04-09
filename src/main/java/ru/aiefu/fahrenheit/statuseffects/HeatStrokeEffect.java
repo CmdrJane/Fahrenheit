@@ -6,11 +6,9 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.Difficulty;
 import ru.aiefu.fahrenheit.Fahrenheit;
-import ru.aiefu.fahrenheit.Utils;
 
 public class HeatStrokeEffect extends StatusEffect {
     public HeatStrokeEffect() {
