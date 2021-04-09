@@ -1,7 +1,6 @@
 package ru.aiefu.fahrenheit.statuseffects;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectType;
@@ -22,9 +21,9 @@ public class HeatStrokeEffect extends StatusEffect {
             entity.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 15));
             Difficulty diff = entity.world.getDifficulty();
             if(diff == Difficulty.NORMAL && entity.getHealth() > 1.0F) {
-                entity.damage(DamageSource.GENERIC, 0.5F);
+                entity.damage(Fahrenheit.HEAT_STROKE_DMG, 0.5F);
             } else if(diff == Difficulty.HARD){
-                entity.damage(DamageSource.GENERIC, 1.0F);
+                entity.damage(Fahrenheit.HEAT_STROKE_DMG, 1.0F);
             }
         }
     }

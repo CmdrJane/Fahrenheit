@@ -1,7 +1,6 @@
 package ru.aiefu.fahrenheit.statuseffects;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectType;
@@ -21,9 +20,9 @@ public class Hypothermia extends StatusEffect {
             entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 15));
             Difficulty diff = entity.world.getDifficulty();
             if(diff == Difficulty.NORMAL && entity.getHealth() > 1.0F) {
-                entity.damage(DamageSource.GENERIC, 1.0F);
+                entity.damage(Fahrenheit.HYPOTHERMIA_DMG, 1.0F);
             } else if(diff == Difficulty.HARD){
-                entity.damage(DamageSource.GENERIC, 1.0F);
+                entity.damage(Fahrenheit.HYPOTHERMIA_DMG, 1.0F);
             }
         }
     }

@@ -9,7 +9,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 

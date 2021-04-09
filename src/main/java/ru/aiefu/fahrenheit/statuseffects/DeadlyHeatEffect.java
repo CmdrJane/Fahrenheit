@@ -17,7 +17,7 @@ public class DeadlyHeatEffect extends StatusEffect {
         ++timer;
         if(timer >= 20 && entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
             timer = 0;
-            entity.damage(DamageSource.GENERIC, 2.0F);
+            entity.damage(Fahrenheit.DEADLY_HEAT_DMG, 2.0F);
         }
     }
 
