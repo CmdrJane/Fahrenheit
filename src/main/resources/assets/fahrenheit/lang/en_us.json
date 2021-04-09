@@ -1,0 +1,12 @@
+{
+  "death.attack.out_or_air_source": "%1$s died from hypoxia",
+  "death.attack.out_or_air_source.player": "%1$s died from hypoxia whilst fighting %2$s",
+  "death.attack.hypothermia_source": "%1$s was frozen to death",
+  "death.attack.hypothermia_source.player": "%1$s was frozen to death whilst fighting %2$s",
+  "death.attack.heat_stroke_source": "%1$s was melted down",
+  "death.attack.heat_stroke_source.player": "%1$s was melted down whilst fighting %2$s",
+  "death.attack.deadly_heat_source": "%1$s tried to explore Nether without proper protection",
+  "death.attack.deadly_heat_source.player": "%1$s tried to explore Nether without proper protection whilst fighting %2$s",
+  "death.attack.deadly_cold_source": "%1$s was frozen in space",
+  "death.attack.deadly_cold_source.player": "%1$s was frozen in space whilst fighting %2$s"
+}
