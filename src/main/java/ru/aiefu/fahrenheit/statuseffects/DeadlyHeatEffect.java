@@ -1,7 +1,6 @@
 package ru.aiefu.fahrenheit.statuseffects;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,9 +14,10 @@ public class DeadlyHeatEffect extends StatusEffect {
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
         ++timer;
-        if(timer >= 20 && entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
+        if(timer >= 30 && entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
             timer = 0;
-            entity.damage(Fahrenheit.DEADLY_HEAT_DMG, 2.0F);
+            entity.setOnFireFor(4);
+            entity.damage(Fahrenheit.DEADLY_HEAT_DMG, 0.5F);
         }
     }
 

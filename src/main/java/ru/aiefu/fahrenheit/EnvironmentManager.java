@@ -1,6 +1,5 @@
 package ru.aiefu.fahrenheit;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -30,6 +29,7 @@ public class EnvironmentManager {
         }
 
         if(tickTimer >= 10) {
+            long startTime = System.nanoTime();
             tickTimer = 0;
 
             BlockPos playerPos = player.getBlockPos();
@@ -37,10 +37,19 @@ public class EnvironmentManager {
             Registry<DimensionType> dimTypeReg = player.world.getRegistryManager().getDimensionTypes();
             DimensionType playerDim = player.world.getDimension();
 
-            if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !player.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
-                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
+            if(player.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
+
             }
-            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && !player.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
+            else if(player.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
+
+            }
+            else if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY)){
+                this.tempProgress += 6.0F;
+                if(this.temp >= 15) {
+                    player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
+                }
+            }
+            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY)){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_COLD_EFFECT, 15));
             }
             else if(this.temp > 8 && this.temp < 15){
@@ -94,15 +103,17 @@ public class EnvironmentManager {
             }
 
             Map<Identifier, Runnable> blocks = new HashMap<>();
-            blocks.put(Registry.BLOCK.getId(Blocks.LAVA), () -> {System.out.println("It's Worked");
+            blocks.put(new Identifier("minecraft:lava"), () -> {System.out.println("It's Worked");
             });
             for(BlockPos pos : BlockPos.iterateOutwards(playerPos, 4,3,4)){
                 Identifier id = Registry.BLOCK.getId(player.world.getBlockState(pos).getBlock());
                 if(blocks.containsKey(id)){
                     blocks.get(id).run();
-                    return;
+                    break;
                 }
             }
+            long endTime = System.nanoTime();
+            System.out.println("That took " + (endTime - startTime) + " nanos");
         }
     }
     public void addTempProgress(float temp){

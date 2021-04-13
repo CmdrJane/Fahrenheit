@@ -26,7 +26,7 @@ public class ThinAirEffect extends StatusEffect {
             this.timer = 0;
             if(entity.getAir() < -20) {
                 entity.setAir(-20);
-                entity.damage(Fahrenheit.OUT_OF_AIR, 2.0F);
+                entity.damage(Fahrenheit.OUT_OF_AIR, 1.0F);
             }
         }
     }

@@ -7,14 +7,17 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import ru.aiefu.fahrenheit.Fahrenheit;
 
 public class DeadlyColdEffect extends StatusEffect {
+    private int timer = 0;
     public DeadlyColdEffect() {
         super(StatusEffectType.HARMFUL, 1);
     }
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
-            entity.damage(Fahrenheit.DEADLY_COLD_DMG, 2.0F);
+        ++timer;
+        if(timer >= 30 && entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
+            timer = 0;
+            entity.damage(Fahrenheit.DEADLY_COLD_DMG, 1.5F);
         }
     }
 

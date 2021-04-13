@@ -20,7 +20,8 @@
   "entrypoints": {
     "main": [
       "ru.aiefu.fahrenheit.Fahrenheit"
-    ]
+    ],
+    "client": ["ru.aiefu.fahrenheit.FahrenheitClient"]
   },
   "mixins": [
     "fahrenheit.mixins.json"
