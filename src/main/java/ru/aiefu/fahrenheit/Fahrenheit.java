@@ -41,7 +41,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_heat"), DEADLY_HEAT_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
 	}
-	public Identifier craftID(String id){
+	public static Identifier craftID(String id){
 		return new Identifier(MOD_ID, id);
 	}
 }

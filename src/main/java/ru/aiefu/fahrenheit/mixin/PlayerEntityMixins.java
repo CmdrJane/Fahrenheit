@@ -1,6 +1,7 @@
 package ru.aiefu.fahrenheit.mixin;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,5 +19,13 @@ public class PlayerEntityMixins implements IPlayerMixins {
 	}
 	public EnvironmentManager getEnviroManager(){
 		return this.enviroManager;
+	}
+	@Inject(method = "writeCustomDataToTag", at = @At("TAIL"))
+	private void writeEnviroManager(CompoundTag tag, CallbackInfo ci){
+		enviroManager.writeToTag(tag);
+	}
+	@Inject(method = "readCustomDataFromTag", at = @At("TAIL"))
+	private void readEnviroManager(CompoundTag tag, CallbackInfo ci){
+		enviroManager.readFromTag(tag);
 	}
 }

@@ -1,13 +1,20 @@
 package ru.aiefu.fahrenheit;
 
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 
+import java.nio.Buffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,11 +28,11 @@ public class EnvironmentManager {
 
         if(this.tempProgress >= 6.0F){
             this.tempProgress = 0;
-            this.temp = Math.min(this.temp += 1, 15);
+            this.temp = Math.min(this.temp += 1, 20);
         }
         if (this.tempProgress <= -6.0F){
             this.tempProgress = 0;
-            this.temp = Math.max(this.temp -= 1, -15);
+            this.temp = Math.max(this.temp -= 1, -20);
         }
 
         if(tickTimer >= 10) {
@@ -45,23 +52,23 @@ public class EnvironmentManager {
             }
             else if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY)){
                 this.tempProgress += 6.0F;
-                if(this.temp >= 15) {
+                if(this.temp >= 20) {
                     player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
                 }
             }
             else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY)){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_COLD_EFFECT, 15));
             }
-            else if(this.temp > 8 && this.temp < 15){
+            else if(this.temp > 8 && this.temp < 20){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.HEAT_EFFECT, 15));
             }
-            else if(this.temp >= 15){
+            else if(this.temp >= 20){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.HEAT_STROKE, 15));
             }
-            else if(this.temp < -8 && this.temp > -15){
+            else if(this.temp < -8 && this.temp > -20){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.COLD_EFFECT, 15));
             }
-            else if(this.temp <= -15){
+            else if(this.temp <= -20){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.HYPOTHERMIA, 15));
             }
 
@@ -112,14 +119,34 @@ public class EnvironmentManager {
                     break;
                 }
             }
+            ServerPlayerEntity serverPlayer = player.getServer().getPlayerManager().getPlayer(player.getUuid());
+            if(serverPlayer != null) {
+                ServerPlayNetworking.send(serverPlayer, Fahrenheit.craftID("sync_temp"), new PacketByteBuf(Unpooled.buffer().writeInt(this.temp)));
+            }
             long endTime = System.nanoTime();
             System.out.println("That took " + (endTime - startTime) + " nanos");
         }
     }
+    public void writeToTag(CompoundTag tag){
+
+    }
+    public void readFromTag(CompoundTag tag){
+
+    }
+
     public void addTempProgress(float temp){
         this.tempProgress += temp;
     }
     public void addTempLevel(int temp){
         this.temp += temp;
+    }
+    public int getTemp(){
+        return this.temp;
+    }
+    public void setTemp(int temp){
+        this.temp = temp;
+    }
+    public void setTempProgress(float progress){
+        this.tempProgress = progress;
     }
 }
