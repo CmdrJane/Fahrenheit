@@ -8,6 +8,7 @@
     "PlayerEntityMixins"
   ],
   "client": [
+    "InGameHudMixins"
   ],
   "injectors": {
     "defaultRequire": 1
