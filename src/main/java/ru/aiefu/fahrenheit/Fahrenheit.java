@@ -16,8 +16,8 @@ public class Fahrenheit implements ModInitializer {
 	public static final StatusEffect WET_EFFECT = new WetEffect();
 	public static final StatusEffect HEAT_STROKE = new HeatStrokeEffect();
 	public static final StatusEffect HYPOTHERMIA = new Hypothermia();
-	public static final StatusEffect COLD_EFFECT = new ColdEffect();
-	public static final StatusEffect HEAT_EFFECT = new HeatEffect();
+	public static final StatusEffect SATURATION_EFFECT = new SaturationEffect();
+	public static final StatusEffect REFRESHIN_EFFECT = new RefreshingEffect();
 	public static final StatusEffect DEADLY_COLD_EFFECT = new DeadlyColdEffect();
 	public static final StatusEffect DEADLY_HEAT_EFFECT = new DeadlyHeatEffect();
 	public static final StatusEffect THIN_AIR = new ThinAirEffect();
@@ -35,8 +35,8 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("wet"), WET_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("heat_stroke"), HEAT_STROKE);
 		Registry.register(Registry.STATUS_EFFECT, craftID("hypothermia"), HYPOTHERMIA);
-		Registry.register(Registry.STATUS_EFFECT, craftID("cold"), COLD_EFFECT);
-		Registry.register(Registry.STATUS_EFFECT, craftID("heat"), HEAT_EFFECT);
+		Registry.register(Registry.STATUS_EFFECT, craftID("saturation"), SATURATION_EFFECT);
+		Registry.register(Registry.STATUS_EFFECT, craftID("refreshing"), REFRESHIN_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_cold"), DEADLY_COLD_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_heat"), DEADLY_HEAT_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);

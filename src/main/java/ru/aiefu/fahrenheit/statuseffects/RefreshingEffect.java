@@ -3,8 +3,8 @@ package ru.aiefu.fahrenheit.statuseffects;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectType;
 
-public class HeatEffect extends StatusEffect {
-    public HeatEffect() {
+public class RefreshingEffect extends StatusEffect {
+    public RefreshingEffect() {
         super(StatusEffectType.NEUTRAL, 5);
     }
 
