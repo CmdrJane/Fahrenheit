@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "LivingEntityMixins",
-    "PlayerEntityMixins"
+    "PlayerEntityMixins",
+    "PotionItemMixins"
   ],
   "client": [
     "InGameHudMixins"

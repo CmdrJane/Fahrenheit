@@ -3,6 +3,7 @@ package ru.aiefu.fahrenheit;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.AbstractFurnaceBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FurnaceBlock;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -10,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.state.property.Properties;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -21,24 +23,30 @@ import net.minecraft.world.dimension.DimensionType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class EnvironmentManager {
     private int temp = 0;
     private float tempProgress = 0;
     private int tickTimer = 0;
-    private int water = 0;
-    private int waterProgress = 0;
+    private int water = 20;
+    private float waterProgress = 0;
+    private Map<Identifier, Float> blocksTempMap = new HashMap<>();
 
     public void tick(PlayerEntity player){
         ++tickTimer;
 
         if(this.tempProgress >= 6.0F){
             this.tempProgress = 0;
-            this.temp = Math.min(this.temp += 1, 20);
+            this.temp = Math.min(this.temp + 1, 20);
         }
         if (this.tempProgress <= -6.0F){
             this.tempProgress = 0;
-            this.temp = Math.max(this.temp -= 1, -20);
+            this.temp = Math.max(this.temp - 1, -20);
+        }
+        if(this.waterProgress >= 12.0F){
+            this.waterProgress = 0;
+            this.water = Math.max(this.water - 1, 0);
         }
 
         if(tickTimer >= 10) {
@@ -57,7 +65,7 @@ public class EnvironmentManager {
 
 
             if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !blChill){
-                this.tempProgress += 6.0F;
+                this.tempProgress += 3.0F;
                 if(this.temp >= 20) {
                     player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
                 }
@@ -80,12 +88,7 @@ public class EnvironmentManager {
                 tmp = -0.15F;
             }
             else if (biomeTemp < 0.8F && biomeTemp >= 0.6F){
-                if(world.isDay()){
-                    tmp = 0.05F;
-                }
-                else {
-                    tmp = -0.08F;
-                }
+                tmp = world.isDay() ? 0.07F : -0.10F;
             }
             else if (biomeTemp >= 0.8F && biomeTemp < 1.5F){
                 tmp = 0.2F;
@@ -102,13 +105,6 @@ public class EnvironmentManager {
                 tmp = -0.15F;
                 System.out.println(tmp);
             }
-            if(blWarm && this.temp < 4){
-                tmp = 0.4F;
-            }
-            else if(blChill && this.temp > 6){
-                tmp = -0.4F;
-            }
-            this.tempProgress += tmp;
 
             if (isWet && !blWarm) {
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.WET_EFFECT, 60));
@@ -117,30 +113,47 @@ public class EnvironmentManager {
             if(player.getEyeY() >= 170){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.THIN_AIR, 15));
             }
-
-            Map<Identifier, Runnable> blocks = new HashMap<>();
-            blocks.put(new Identifier("minecraft:lava"), () -> {
-                System.out.println("It's Worked");
-                this.addTempProgress(0.7F);
-            });
+            this.blocksTempMap.put(new Identifier("minecraft:lava"), 2.0F);
             for(BlockPos pos : posIterable){
                 Identifier id = Registry.BLOCK.getId(player.world.getBlockState(pos).getBlock());
-                if(world.getBlockState(pos).getBlock() == Blocks.FURNACE && world.getBlockState(pos).get(AbstractFurnaceBlock.LIT)){
-                    this.tempProgress += 0.5F;
+                if(world.getBlockState(pos).getBlock() == Blocks.FURNACE && world.getBlockState(pos).get(Properties.LIT)){
+                    tmp += 0.5F;
                 }
-                else if(blocks.containsKey(id)){
-                    blocks.get(id).run();
+                else if(blocksTempMap.containsKey(id)){
+                    try {
+                        tmp += blocksTempMap.get(id);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
                 }
             }
+            if(blWarm && this.temp < 4){
+                tmp = 0.4F;
+            }
+            else if(blChill && this.temp > 6){
+                tmp = -0.4F;
+            }
+            this.tempProgress += tmp;
+
+            if(this.temp >= 10){
+                this.waterProgress += 0.3F;
+            }
+            else {
+                this.waterProgress += 0.10F;
+            }
 
             ServerPlayerEntity serverPlayer = player.getServer().getPlayerManager().getPlayer(player.getUuid());
+            CompoundTag data = new CompoundTag();
+            data.putInt("temp", this.temp);
+            data.putInt("water", this.water);
             if(serverPlayer != null) {
-                ServerPlayNetworking.send(serverPlayer, Fahrenheit.craftID("sync_temp"), new PacketByteBuf(Unpooled.buffer().writeInt(this.temp)));
+                ServerPlayNetworking.send(serverPlayer, Fahrenheit.craftID("sync_temp"), new PacketByteBuf(Unpooled.buffer()).writeCompoundTag(data));
             }
             long endTime = System.nanoTime();
             System.out.println("That took " + (endTime - startTime) + " nanos");
             System.out.println(this.temp +"/" + this.tempProgress);
+            System.out.println(this.water);
         }
     }
     public void writeToTag(CompoundTag tag){
@@ -153,13 +166,20 @@ public class EnvironmentManager {
     private boolean checkStoneNearby(PlayerEntity player, Iterable<BlockPos> iterable){
         int i = 0;
         for (BlockPos pos : iterable){
-           if(player.world.getBlockState(pos).isIn(BlockTags.BASE_STONE_OVERWORLD) && player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1.8D){
+           if(player.world.getBlockState(pos).isIn(BlockTags.BASE_STONE_OVERWORLD) && player.squaredDistanceTo(pos.getX() + 0.5F, pos.getY() +0.5F, pos.getZ() +0.5F) <= 2.5D){
                ++i;
            }
         }
         System.out.println(i);
         System.out.println(i>= 4);
-        return i >= 4;
+        return i>= 4;
+    }
+
+    public void addWaterLevels(int water){
+        this.water = Math.min(this.water + water, 20);
+    }
+    public void addWaterProgress(float waterProgress){
+        this.waterProgress += Math.max(waterProgress, 0);
     }
 
     public void addTempProgress(float temp){

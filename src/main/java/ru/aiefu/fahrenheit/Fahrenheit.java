@@ -1,14 +1,22 @@
 package ru.aiefu.fahrenheit;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.FoodComponent;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.statuseffects.*;
 
 public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
+
+	//Items
+	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()));
 
 	//StatusEffects
 	public static final StatusEffect WARM_EFFECT = new WarmEffect();
@@ -40,6 +48,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_cold"), DEADLY_COLD_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_heat"), DEADLY_HEAT_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
+		Registry.register(Registry.ITEM, craftID("water_flask"), WATER_FLASK);
 	}
 	public static Identifier craftID(String id){
 		return new Identifier(MOD_ID, id);
