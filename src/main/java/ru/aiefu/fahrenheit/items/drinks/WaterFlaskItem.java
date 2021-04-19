@@ -1,7 +1,6 @@
 package ru.aiefu.fahrenheit.items.drinks;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FluidDrainable;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -20,8 +19,11 @@ import net.minecraft.world.World;
 import ru.aiefu.fahrenheit.IPlayerMixins;
 
 public class WaterFlaskItem extends Item {
-    public WaterFlaskItem(Settings settings) {
+
+    private final int waterCapacity;
+    public WaterFlaskItem(Settings settings, int maxCapacity) {
         super(settings);
+        this.waterCapacity = maxCapacity;
     }
 
     @Override
@@ -34,8 +36,8 @@ public class WaterFlaskItem extends Item {
         int water = tag.getInt("water");
         System.out.println(water);
         BlockHitResult result = raycast(world, user, RaycastContext.FluidHandling.SOURCE_ONLY);
-        if(result.getType() == HitResult.Type.BLOCK && world.getBlockState(result.getBlockPos()).getBlock() instanceof FluidDrainable && water < 400){
-            tag.putInt("water", Math.min(water + 100, 400));
+        if(result.getType() == HitResult.Type.BLOCK && world.getBlockState(result.getBlockPos()).getBlock() == Blocks.WATER && water < this.waterCapacity){
+            tag.putInt("water", Math.min(water + 100, this.waterCapacity));
             return TypedActionResult.success(stack);
         }
         else if(water >= 100){
@@ -46,7 +48,7 @@ public class WaterFlaskItem extends Item {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return 60;
+        return 40;
     }
 
     public UseAction getUseAction(ItemStack stack) {
@@ -69,7 +71,7 @@ public class WaterFlaskItem extends Item {
         int water = tag.getInt("water");
         if(water >= 100 && user instanceof IPlayerMixins){
             tag.putInt("water", Math.max(water - 100, 0));
-            ((IPlayerMixins)user).getEnviroManager().addWaterLevels(3);
+            ((IPlayerMixins)user).getEnviroManager().addWaterLevels(2, 2);
             world.playSound(null, user.getX(), user.getY(), user.getZ(), this.getDrinkSound(), SoundCategory.NEUTRAL, 1.0F, 1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
         }
         return stack;

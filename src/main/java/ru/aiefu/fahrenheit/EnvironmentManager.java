@@ -30,6 +30,7 @@ public class EnvironmentManager {
     private float tempProgress = 0;
     private int tickTimer = 0;
     private int water = 20;
+    private int hydration = 0;
     private float waterProgress = 0;
     private Map<Identifier, Float> blocksTempMap = new HashMap<>();
 
@@ -40,11 +41,15 @@ public class EnvironmentManager {
             this.tempProgress = 0;
             this.temp = Math.min(this.temp + 1, 20);
         }
-        if (this.tempProgress <= -6.0F){
+        else if (this.tempProgress <= -6.0F){
             this.tempProgress = 0;
             this.temp = Math.max(this.temp - 1, -20);
         }
-        if(this.waterProgress >= 12.0F){
+        if(this.water > 20 && hydration > 0 && this.waterProgress >= 6.0F){
+            this.waterProgress = 0;
+            this.hydration = Math.max(this.hydration - 1, 0);
+        }
+        else if(this.waterProgress >= 12.0F){
             this.waterProgress = 0;
             this.water = Math.max(this.water - 1, 0);
         }
@@ -175,8 +180,28 @@ public class EnvironmentManager {
         return i>= 4;
     }
 
+    public void addWaterLevels(int water, int hydration){
+        this.water = Math.min(this.water + water, 20);
+        this.hydration = Math.min(this.hydration + hydration, 10);
+    }
+
     public void addWaterLevels(int water){
         this.water = Math.min(this.water + water, 20);
+        /*
+        int waterToAdd = this.water + water;
+        if(waterToAdd > 20){
+            int j = waterToAdd - 20;
+            this.water = 20;
+            this.hydration = Math.min(j, 10);
+        }
+        else {
+            this.water = waterToAdd;
+        }
+         */
+
+    }
+    public void addHydrationLevel(int level){
+        this.hydration = Math.min(this.hydration + level, 10);
     }
     public void addWaterProgress(float waterProgress){
         this.waterProgress += Math.max(waterProgress, 0);

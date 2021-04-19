@@ -16,7 +16,8 @@ public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
 
 	//Items
-	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()));
+	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()), 400);
+	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()), 800);
 
 	//StatusEffects
 	public static final StatusEffect WARM_EFFECT = new WarmEffect();
@@ -49,6 +50,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_heat"), DEADLY_HEAT_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
 		Registry.register(Registry.ITEM, craftID("water_flask"), WATER_FLASK);
+		Registry.register(Registry.ITEM, craftID("metal_water_flask"), METAL_WATER_FLASK);
 	}
 	public static Identifier craftID(String id){
 		return new Identifier(MOD_ID, id);
