@@ -29,6 +29,7 @@ public class EnvironmentManager {
     private int temp = 0;
     private float tempProgress = 0;
     private int tickTimer = 0;
+    private int thirstTimer = 0;
     private int water = 20;
     private int hydration = 0;
     private float waterProgress = 0;
@@ -52,6 +53,13 @@ public class EnvironmentManager {
         else if(this.waterProgress >= 12.0F){
             this.waterProgress = 0;
             this.water = Math.max(this.water - 1, 0);
+        }
+        if(this.water <= 0){
+            ++this.thirstTimer;
+        }
+        if(this.thirstTimer >= 80){
+            this.thirstTimer = 0;
+            player.damage(Fahrenheit.DEHYDRATION, 1.0F);
         }
 
         if(tickTimer >= 10) {
@@ -187,18 +195,6 @@ public class EnvironmentManager {
 
     public void addWaterLevels(int water){
         this.water = Math.min(this.water + water, 20);
-        /*
-        int waterToAdd = this.water + water;
-        if(waterToAdd > 20){
-            int j = waterToAdd - 20;
-            this.water = 20;
-            this.hydration = Math.min(j, 10);
-        }
-        else {
-            this.water = waterToAdd;
-        }
-         */
-
     }
     public void addHydrationLevel(int level){
         this.hydration = Math.min(this.hydration + level, 10);

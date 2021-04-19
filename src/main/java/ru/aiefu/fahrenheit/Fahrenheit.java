@@ -36,6 +36,7 @@ public class Fahrenheit implements ModInitializer {
 	public static final DamageSource HEAT_STROKE_DMG = new DamageSourcesCustom("heat_stroke_source").setBypassesArmor();
 	public static final DamageSource DEADLY_HEAT_DMG = new DamageSourcesCustom("deadly_heat_source").setBypassesArmor();
 	public static final DamageSource DEADLY_COLD_DMG = new DamageSourcesCustom("deadly_cold_source").setBypassesArmor();
+	public static final DamageSource DEHYDRATION = new DamageSourcesCustom("dehydration_source").setBypassesArmor();
 
 	@Override
 	public void onInitialize() {
