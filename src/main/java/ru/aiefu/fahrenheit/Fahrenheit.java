@@ -1,6 +1,7 @@
 package ru.aiefu.fahrenheit;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
@@ -9,11 +10,19 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import ru.aiefu.fahrenheit.commands.GetSquaredDistanceToCmd;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.statuseffects.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
+	public static Map<Identifier, Map<String, float[]>> blocks_cfg = new HashMap<>();
 
 	//Items
 	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()), 400);
@@ -40,6 +49,7 @@ public class Fahrenheit implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		craftPaths();
 		Registry.register(Registry.STATUS_EFFECT, craftID("warm"), WARM_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("chill"), CHILL_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("wet"), WET_EFFECT);
@@ -52,8 +62,29 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
 		Registry.register(Registry.ITEM, craftID("water_flask"), WATER_FLASK);
 		Registry.register(Registry.ITEM, craftID("metal_water_flask"), METAL_WATER_FLASK);
+		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+			GetSquaredDistanceToCmd.register(dispatcher);
+		});
 	}
 	public static Identifier craftID(String id){
 		return new Identifier(MOD_ID, id);
+	}
+	public void craftPaths(){
+		try{
+			if(!Files.isDirectory(Paths.get("./config"))){
+				Files.createDirectory(Paths.get("./config"));
+			}
+			if(!Files.isDirectory(Paths.get("./config/fahrenheit"))){
+				Files.createDirectory(Paths.get("./config/fahrenheit"));
+			}
+			IOManager ioManager = new IOManager();
+			if(!Files.exists(Paths.get("./config/fahrenheit/blocks-data.json"))){
+				ioManager.genDefaultCfg();
+			}
+			ioManager.readBlocksCfg();
+		}
+		catch (IOException e){
+			e.printStackTrace();
+		}
 	}
 }

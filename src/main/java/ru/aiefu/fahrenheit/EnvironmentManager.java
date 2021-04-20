@@ -2,28 +2,23 @@ package ru.aiefu.fahrenheit;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.AbstractFurnaceBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FurnaceBlock;
+import net.minecraft.block.*;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.property.Properties;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 public class EnvironmentManager {
     private int temp = 0;
@@ -46,7 +41,7 @@ public class EnvironmentManager {
             this.tempProgress = 0;
             this.temp = Math.max(this.temp - 1, -20);
         }
-        if(this.water > 20 && hydration > 0 && this.waterProgress >= 6.0F){
+        if(this.water >= 20 && hydration > 0 && this.waterProgress >= 6.0F){
             this.waterProgress = 0;
             this.hydration = Math.max(this.hydration - 1, 0);
         }
@@ -126,19 +121,14 @@ public class EnvironmentManager {
             if(player.getEyeY() >= 170){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.THIN_AIR, 15));
             }
-            this.blocksTempMap.put(new Identifier("minecraft:lava"), 2.0F);
-            for(BlockPos pos : posIterable){
-                Identifier id = Registry.BLOCK.getId(player.world.getBlockState(pos).getBlock());
-                if(world.getBlockState(pos).getBlock() == Blocks.FURNACE && world.getBlockState(pos).get(Properties.LIT)){
-                    tmp += 0.5F;
-                }
-                else if(blocksTempMap.containsKey(id)){
-                    try {
-                        tmp += blocksTempMap.get(id);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            if(!Fahrenheit.blocks_cfg.isEmpty()) {
+                Map<Identifier, Map<String, float[]>> tempMap = Fahrenheit.blocks_cfg;
+                for (BlockPos pos : posIterable) {
+                    Identifier id = Registry.BLOCK.getId(world.getBlockState(pos).getBlock());
+                    if(tempMap.containsKey(id)){
+                        float tmp1 = call(tempMap.get(id), world.getBlockState(pos), player, pos);
+                        tmp = tmp1 > tmp ? tmp + tmp1 : tmp;
                     }
-                    break;
                 }
             }
             if(blWarm && this.temp < 4){
@@ -175,6 +165,18 @@ public class EnvironmentManager {
     public void readFromTag(CompoundTag tag){
 
     }
+
+    public float call(Map<String, float[]> map, BlockState state, PlayerEntity player, BlockPos pos){
+        for(String p : map.keySet()){
+            float [] values = map.get(p).length > 1 ? map.get(p) : new float[]{1.0F, 1.0F};
+            if(p.equals("default")){
+                return player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= values[1] ? values[0] : values[0] / 2;
+            } else if (state.get(BooleanProperty.of(p))){
+                return player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= values[1] ? values[0] : values[0] / 2;
+            }
+        }
+        return 0.0F;
+    };
 
     private boolean checkStoneNearby(PlayerEntity player, Iterable<BlockPos> iterable){
         int i = 0;
