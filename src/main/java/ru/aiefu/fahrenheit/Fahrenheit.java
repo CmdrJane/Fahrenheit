@@ -10,7 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import ru.aiefu.fahrenheit.commands.GetSquaredDistanceToCmd;
+import ru.aiefu.fahrenheit.commands.GetDistanceTo;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.statuseffects.*;
 
@@ -63,7 +63,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.ITEM, craftID("water_flask"), WATER_FLASK);
 		Registry.register(Registry.ITEM, craftID("metal_water_flask"), METAL_WATER_FLASK);
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-			GetSquaredDistanceToCmd.register(dispatcher);
+			GetDistanceTo.register(dispatcher);
 		});
 	}
 	public static Identifier craftID(String id){

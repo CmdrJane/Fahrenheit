@@ -170,9 +170,9 @@ public class EnvironmentManager {
         for(String p : map.keySet()){
             float [] values = map.get(p).length > 1 ? map.get(p) : new float[]{1.0F, 1.0F};
             if(p.equals("default")){
-                return player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= values[1] ? values[0] : values[0] / 2;
+                return Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) <= values[1] ? values[0] : values[0] / 2;
             } else if (state.get(BooleanProperty.of(p))){
-                return player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= values[1] ? values[0] : values[0] / 2;
+                return Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) <= values[1] ? values[0] : values[0] / 2;
             }
         }
         return 0.0F;
@@ -181,7 +181,7 @@ public class EnvironmentManager {
     private boolean checkStoneNearby(PlayerEntity player, Iterable<BlockPos> iterable){
         int i = 0;
         for (BlockPos pos : iterable){
-           if(player.world.getBlockState(pos).isIn(BlockTags.BASE_STONE_OVERWORLD) && player.squaredDistanceTo(pos.getX() + 0.5F, pos.getY() +0.5F, pos.getZ() +0.5F) <= 2.5D){
+           if(player.world.getBlockState(pos).isIn(BlockTags.BASE_STONE_OVERWORLD) && Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5F, pos.getY() +0.5F, pos.getZ() +0.5F)) <= 2.5D){
                ++i;
            }
         }
