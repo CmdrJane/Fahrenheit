@@ -3,12 +3,18 @@ package ru.aiefu.fahrenheit;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
@@ -25,8 +31,8 @@ public class Fahrenheit implements ModInitializer {
 	public static Map<Identifier, Map<String, float[]>> blocks_cfg = new HashMap<>();
 
 	//Items
-	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()), 400);
-	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()), 800);
+	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
+	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 800);
 
 	//StatusEffects
 	public static final StatusEffect WARM_EFFECT = new WarmEffect();
@@ -65,6 +71,7 @@ public class Fahrenheit implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			GetDistanceTo.register(dispatcher);
 		});
+		serverSidePackets();
 	}
 	public static Identifier craftID(String id){
 		return new Identifier(MOD_ID, id);
@@ -86,5 +93,18 @@ public class Fahrenheit implements ModInitializer {
 		catch (IOException e){
 			e.printStackTrace();
 		}
+	}
+	public void serverSidePackets(){
+		ServerPlayNetworking.registerGlobalReceiver(craftID("drink_from_water_block"), (server, player, handler, buf, responseSender) -> {
+			HitResult result = player.raycast(20.0D, 0.0F, true);
+			if(result.getType() == HitResult.Type.BLOCK && player.world.getBlockState(new BlockPos(result.getPos())).getBlock() == Blocks.WATER){
+				EnvironmentManager enviroManager = ((IPlayerMixins)player).getEnviroManager();
+				enviroManager.addWaterLevels(2, 1);
+				if(enviroManager.getTemp() > 10) {
+					enviroManager.addTempLevel(-1);
+				}
+				player.world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_GENERIC_DRINK, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+			}
+		});
 	}
 }

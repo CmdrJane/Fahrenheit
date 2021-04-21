@@ -12,6 +12,7 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -33,11 +34,11 @@ public class EnvironmentManager {
     public void tick(PlayerEntity player){
         ++tickTimer;
 
-        if(this.tempProgress >= 6.0F){
+        if(this.tempProgress >= 8.0F){
             this.tempProgress = 0;
             this.temp = Math.min(this.temp + 1, 20);
         }
-        else if (this.tempProgress <= -6.0F){
+        else if (this.tempProgress <= -8.0F){
             this.tempProgress = 0;
             this.temp = Math.max(this.temp - 1, -20);
         }
@@ -206,10 +207,10 @@ public class EnvironmentManager {
     }
 
     public void addTempProgress(float temp){
-        this.tempProgress += temp;
+        this.tempProgress = MathHelper.clamp(this.tempProgress + temp, -8.0F, 8.0F);
     }
     public void addTempLevel(int temp){
-        this.temp += temp;
+        this.temp = MathHelper.clamp(this.temp + temp, -20, 20);
     }
     public int getTemp(){
         return this.temp;
