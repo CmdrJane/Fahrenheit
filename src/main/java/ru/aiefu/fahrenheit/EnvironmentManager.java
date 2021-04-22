@@ -29,7 +29,6 @@ public class EnvironmentManager {
     private int water = 20;
     private int hydration = 0;
     private float waterProgress = 0;
-    private Map<Identifier, Float> blocksTempMap = new HashMap<>();
 
     public void tick(PlayerEntity player){
         ++tickTimer;
@@ -128,7 +127,12 @@ public class EnvironmentManager {
                     Identifier id = Registry.BLOCK.getId(world.getBlockState(pos).getBlock());
                     if(tempMap.containsKey(id)){
                         float tmp1 = call(tempMap.get(id), world.getBlockState(pos), player, pos);
-                        tmp = tmp1 > tmp ? tmp + tmp1 : tmp;
+                        if(tmp1 > 0){
+                            tmp = tmp1 > tmp ? tmp1 + tmp : tmp;
+                        }
+                        else if(tmp1 < 0){
+                            tmp = tmp1 < tmp ? tmp1 + tmp : tmp;
+                        }
                     }
                 }
             }
@@ -161,10 +165,20 @@ public class EnvironmentManager {
         }
     }
     public void writeToTag(CompoundTag tag){
-
+        tag.putInt("temperature", this.temp);
+        tag.putInt("water", this.water);
+        tag.putInt("hydration", this.hydration);
+        tag.putInt("thirstTimer", this.thirstTimer);
+        tag.putFloat("tempProgress", this.tempProgress);
+        tag.putFloat("waterProgress", this.waterProgress);
     }
     public void readFromTag(CompoundTag tag){
-
+        this.temp = tag.getInt("temperature");
+        this.water = tag.getInt("water");
+        this.hydration = tag.getInt("hydration");
+        this.thirstTimer = tag.getInt("thirstTimer");
+        this.tempProgress = tag.getFloat("tempProgress");
+        this.waterProgress = tag.getFloat("waterProgress");
     }
 
     public float call(Map<String, float[]> map, BlockState state, PlayerEntity player, BlockPos pos){

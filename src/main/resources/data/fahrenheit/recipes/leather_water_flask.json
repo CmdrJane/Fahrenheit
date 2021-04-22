@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "water_flask",
+  "pattern": [
+    " L ",
+    "L L",
+    " L"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:leather"
+    }
+  },
+  "result": {
+    "item": "fahrenheit:water_flask",
+    "data": {
+      "water": 0
+    }
+  }
+}

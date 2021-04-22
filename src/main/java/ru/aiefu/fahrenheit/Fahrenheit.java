@@ -29,6 +29,7 @@ import java.util.Map;
 
 public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
+	public static ConfigInstance config_instance;
 	public static Map<Identifier, Map<String, float[]>> blocks_cfg = new HashMap<>();
 
 	//Items
