@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "water_flask",
+  "pattern": [
+    " R ",
+    "RLR",
+    "RRR"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "minecraft:leather"
+    }
+  },
+  "result": {
+    "item": "fahrenheit:metal_water_flask",
+    "data": {
+      "water": 0
+    }
+  }
+}
