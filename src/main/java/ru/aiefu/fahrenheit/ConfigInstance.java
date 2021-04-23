@@ -1,31 +1,17 @@
 package ru.aiefu.fahrenheit;
 
 public class ConfigInstance {
-    public float precision;
-    public int operationMode;
-    public boolean enableTemperature;
-    public boolean enableTemperatureHud;
-    public boolean enableThirst;
-    public boolean enableThirstHud;
-    public boolean disableDeadlyCold;
-    public boolean disableDeadlyHeat;
-    public boolean disableThinAir;
-    public boolean waterFlatChill;
-    public boolean cauldronInfiniteSource;
-
-    public ConfigInstance(float precision, int operationMode, boolean enableTemperature, boolean enableTemperatureHud,
-                          boolean enableThirst, boolean enableThirstHud, boolean disableDeadlyCold, boolean disableDeadlyHeat,
-                          boolean disableThinAir, boolean waterFlatChill, boolean cauldronInfiniteSource) {
-        this.precision = precision;
-        this.operationMode = operationMode;
-        this.enableTemperature = enableTemperature;
-        this.enableTemperatureHud = enableTemperatureHud;
-        this.enableThirst = enableThirst;
-        this.enableThirstHud = enableThirstHud;
-        this.disableDeadlyCold = disableDeadlyCold;
-        this.disableDeadlyHeat = disableDeadlyHeat;
-        this.disableThinAir = disableThinAir;
-        this.waterFlatChill = waterFlatChill;
-        this.cauldronInfiniteSource = cauldronInfiniteSource;
-    }
+    public int precision = 10;
+    public int operationMode = 0;
+    public float wetTemp = 0.02F;
+    public int thinAirThreshold = 170;
+    public boolean enableTemperature = true;
+    public boolean enableTemperatureHud = true;
+    public boolean enableThirst = true;
+    public boolean enableThirstHud = true;
+    public boolean disableDeadlyCold = false;
+    public boolean disableDeadlyHeat = false;
+    public boolean disableThinAir = false;
+    public boolean waterFlatChill = false;
+    public boolean cauldronInfiniteSource = false;
 }

@@ -2,7 +2,7 @@ package ru.aiefu.fahrenheit;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.*;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -13,16 +13,16 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.MutableRegistry;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class EnvironmentManager {
-    public static HashMap<Identifier, BiomeDataStorage> biomeDataMap;
+    private static int precision = Fahrenheit.config_instance.precision > 0 ? Fahrenheit.config_instance.precision : 1;
     private int temp = 0;
     private float tempProgress = 0;
     private int tickTimer = 0;
@@ -53,34 +53,32 @@ public class EnvironmentManager {
         if(this.water <= 0){
             ++this.thirstTimer;
         }
-        if(this.thirstTimer >= 80){
+        if(this.thirstTimer >= 80 && Fahrenheit.config_instance.enableThirst){
             this.thirstTimer = 0;
             player.damage(Fahrenheit.DEHYDRATION, 1.0F);
         }
 
-        if(tickTimer >= 10) {
+        if(tickTimer >= precision && Fahrenheit.config_instance.enableTemperature && !player.isCreative() && !player.isSpectator()) {
             long startTime = System.nanoTime();
             tickTimer = 0;
 
             World world = player.world;
             BlockPos playerPos = player.getBlockPos();
-            Iterable<BlockPos> posIterable = BlockPos.iterateOutwards(playerPos, 4,3,4);
+            Iterable<BlockPos> posIterable = BlockPos.iterateOutwards(playerPos, 3,3,3);
             float biomeTemp = world.getBiome(playerPos).getTemperature();
             Registry<DimensionType> dimTypeReg = world.getRegistryManager().getDimensionTypes();
             DimensionType playerDim = world.getDimension();
             boolean blChill = player.hasStatusEffect(Fahrenheit.CHILL_EFFECT);
             boolean blWarm = player.hasStatusEffect(Fahrenheit.WARM_EFFECT);
             boolean isWet = player.isWet();
-            System.out.println(world.getBiome(playerPos) == world.getRegistryManager().get(Registry.BIOME_KEY).get(new Identifier("swamp")));
+            boolean isDay = world.isDay();
 
-
-            if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !blChill){
-                this.tempProgress += 3.0F;
-                if(this.temp >= 20) {
-                    player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
-                }
+            if(!Fahrenheit.config_instance.disableDeadlyHeat && playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !blChill){
+                this.tempProgress += 8.0F;
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_HEAT_EFFECT, 15));
             }
-            else if(playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && !blWarm){
+            else if(!Fahrenheit.config_instance.disableDeadlyCold && playerDim == dimTypeReg.get(DimensionType.THE_END_REGISTRY_KEY) && !blWarm){
+                this.tempProgress -= 8.0F;
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.DEADLY_COLD_EFFECT, 15));
             }
             else if(this.temp >= 20 && !blChill){
@@ -91,36 +89,53 @@ public class EnvironmentManager {
             }
 
             float tmp = 0;
-            if( biomeTemp <= 0.35F){
-                tmp = -0.3F;
-            }
-            else if (biomeTemp > 0.35F && biomeTemp < 0.6F){
-                tmp = -0.15F;
-            }
-            else if (biomeTemp < 0.8F && biomeTemp >= 0.6F){
-                tmp = world.isDay() ? 0.07F : -0.10F;
-            }
-            else if (biomeTemp >= 0.8F && biomeTemp < 1.5F){
-                tmp = 0.2F;
-            }
-            else if (biomeTemp >= 1.5F){
-                tmp = 0.3F;
-                if(world.getBiome(playerPos).getCategory().equals(Biome.Category.DESERT)){
-                    if(!world.isDay()) {
-                       tmp = -0.3F;
+            switch (Fahrenheit.config_instance.operationMode){
+                case 0:
+                    if( biomeTemp <= 0.35F){
+                        tmp = isDay ? Fahrenheit.defaultDataStorage.VERY_COLD_BIOMES.dayTemp * precision : Fahrenheit.defaultDataStorage.VERY_COLD_BIOMES.nightTemp * precision;
                     }
-                }
+                    else if (biomeTemp > 0.35F && biomeTemp < 0.6F){
+                        tmp = isDay ? Fahrenheit.defaultDataStorage.COLD_BIOMES.dayTemp * precision : Fahrenheit.defaultDataStorage.COLD_BIOMES.nightTemp * precision;
+                    }
+                    else if (biomeTemp < 0.8F && biomeTemp >= 0.6F){
+                        tmp = isDay ? Fahrenheit.defaultDataStorage.MEDIUM_BIOMES.dayTemp * precision : Fahrenheit.defaultDataStorage.MEDIUM_BIOMES.nightTemp * precision;
+                    }
+                    else if (biomeTemp >= 0.8F && biomeTemp < 1.5F){
+                        tmp = isDay ? Fahrenheit.defaultDataStorage.HOT_BIOMES.dayTemp * precision : Fahrenheit.defaultDataStorage.HOT_BIOMES.nightTemp * precision;
+                    }
+                    else if (biomeTemp >= 1.5F){
+                        tmp = isDay ? Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.dayTemp * precision : Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.nightTemp * precision;
+                        if(world.getBiome(playerPos).getCategory().equals(Biome.Category.DESERT)){
+                            if(!world.isDay()) {
+                                tmp = -Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.dayTemp * precision;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                  MutableRegistry<Biome> biomeRegisrty = world.getRegistryManager().get(Registry.BIOME_KEY);
+                  Biome playerBiome = world.getBiome(playerPos);
+                    tmp = 0.005F * precision;
+                    for(Identifier id : Fahrenheit.biomeDataMap.keySet()){
+                        if(playerBiome == biomeRegisrty.get(id)){
+                            tmp = world.isDay() ? Fahrenheit.biomeDataMap.get(id).dayTemp * precision : Fahrenheit.biomeDataMap.get(id).nightTemp * precision;
+                            break;
+                        }
+                    }
+                    break;
+                //case 2:
+
             }
-            if(playerPos.getY() < player.world.getSeaLevel() - 6 || (!world.isSkyVisible(playerPos) && checkStoneNearby(player, posIterable))){
-                tmp = -0.15F;
-                System.out.println(tmp);
+            if(playerPos.getY() < player.world.getSeaLevel() - 6 || (!world.isSkyVisible(playerPos.add(0, 0.7, 0)) && checkStoneNearby(player, BlockPos.iterateOutwards(playerPos, 1,2,1)))){
+                tmp = -0.015F * precision;
             }
 
             if (isWet && !blWarm) {
-                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.WET_EFFECT, 60));
-                this.tempProgress -= 0.2F;
+                player.addStatusEffect(new StatusEffectInstance(Fahrenheit.WET_EFFECT, 120));
+                System.out.println(Fahrenheit.config_instance.wetTemp * precision);
+                tmp = Fahrenheit.config_instance.waterFlatChill ? Fahrenheit.config_instance.wetTemp * precision : tmp - Fahrenheit.config_instance.wetTemp * precision;
             }
-            if(player.getEyeY() >= 170){
+            if(player.getEyeY() >= Fahrenheit.config_instance.thinAirThreshold && !Fahrenheit.config_instance.disableThinAir){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.THIN_AIR, 15));
             }
             if(!Fahrenheit.blocks_cfg.isEmpty()) {
@@ -128,7 +143,7 @@ public class EnvironmentManager {
                 for (BlockPos pos : posIterable) {
                     Identifier id = Registry.BLOCK.getId(world.getBlockState(pos).getBlock());
                     if(tempMap.containsKey(id)){
-                        float tmp1 = call(tempMap.get(id), world.getBlockState(pos), player, pos);
+                        float tmp1 = call(tempMap.get(id), world.getBlockState(pos), player, pos) * precision;
                         if(tmp1 > 0){
                             tmp = tmp1 > tmp ? tmp1 + tmp : tmp;
                         }
@@ -139,18 +154,18 @@ public class EnvironmentManager {
                 }
             }
             if(blWarm && this.temp < 4){
-                tmp = 0.4F;
+                tmp = 0.04F * precision;
             }
             else if(blChill && this.temp > 6){
-                tmp = -0.4F;
+                tmp = -0.04F * precision;
             }
             this.tempProgress += tmp;
-
-            if(this.temp >= 10){
-                this.waterProgress += 0.3F;
-            }
-            else {
-                this.waterProgress += 0.10F;
+            if(Fahrenheit.config_instance.enableThirst) {
+                if (this.temp >= 10) {
+                    this.waterProgress += 0.025F * precision;
+                } else {
+                    this.waterProgress += 0.005F * precision;
+                }
             }
 
             ServerPlayerEntity serverPlayer = player.getServer().getPlayerManager().getPlayer(player.getUuid());
@@ -191,7 +206,7 @@ public class EnvironmentManager {
     public float call(Map<String, BlockDataStorage> map, BlockState state, PlayerEntity player, BlockPos pos){
         float distance = (float) Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
         for(Map.Entry<String, BlockDataStorage> e : map.entrySet()){
-            if (state.get(BooleanProperty.of(e.getKey()))){
+            if (!e.getKey().equals("default") && state.get(BooleanProperty.of(e.getKey()))){
                 return  distance <= e.getValue().closeRange ? e.getValue().closeRangeTemp : e.getValue().longRangeTemp;
             }
         }
@@ -200,17 +215,20 @@ public class EnvironmentManager {
             return distance <= storage.closeRange ? storage.closeRangeTemp : storage.longRangeTemp;
         }
         return 0.0F;
-    };
+    }
 
     private boolean checkStoneNearby(PlayerEntity player, Iterable<BlockPos> iterable){
         int i = 0;
         for (BlockPos pos : iterable){
-           if(player.world.getBlockState(pos).isIn(BlockTags.BASE_STONE_OVERWORLD) && Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5F, pos.getY() +0.5F, pos.getZ() +0.5F)) <= 2.5D){
+           if(player.world.getBlockState(pos).isIn(BlockTags.BASE_STONE_OVERWORLD)){
                ++i;
            }
+           if(i > 4){
+               break;
+           }
         }
-        System.out.println(i);
-        System.out.println(i>= 4);
+        //System.out.println(i);
+        //System.out.println(i>= 4);
         return i>= 4;
     }
 

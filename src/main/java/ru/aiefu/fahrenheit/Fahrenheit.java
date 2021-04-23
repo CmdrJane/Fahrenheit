@@ -2,6 +2,9 @@ package ru.aiefu.fahrenheit;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Blocks;
@@ -19,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import ru.aiefu.fahrenheit.commands.FahrenheitReloadCfg;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.mixin.SPIManagerMixinsAcc;
@@ -34,6 +38,8 @@ public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
 	public static ConfigInstance config_instance;
 	public static Map<Identifier, Map<String, BlockDataStorage>> blocks_cfg = new HashMap<>();
+	public static HashMap<Identifier, BiomeDataStorage> biomeDataMap = new HashMap<>();
+	public static DefaultDataStorage defaultDataStorage;
 
 	//Items
 	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
@@ -75,6 +81,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.ITEM, craftID("metal_water_flask"), METAL_WATER_FLASK);
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			GetDistanceTo.register(dispatcher);
+			FahrenheitReloadCfg.register(dispatcher);
 		});
 		serverSidePackets();
 	}
@@ -93,13 +100,19 @@ public class Fahrenheit implements ModInitializer {
 			if(!Files.exists(Paths.get("./config/fahrenheit/config.json"))){
 				ioManager.genDefaultCfg();
 			}
+			if(!Files.exists(Paths.get("./config/fahrenheit/biomes-by-temp-category-config.json"))){
+				ioManager.genDefaultDataStorage();
+			}
 			if(!Files.exists(Paths.get("./config/fahrenheit/blocks-data.json"))){
 				ioManager.genBlocksCfg();
 			}
 			if(!Files.exists(Paths.get("./config/fahrenheit/biome-config.json"))){
 				ioManager.genBiomeCfg();
 			}
+			ioManager.readConfig();
+			ioManager.readDefaultDataStorage();
 			ioManager.readBlocksCfg();
+			ioManager.readBiomeCfg();
 		}
 		catch (IOException e){
 			e.printStackTrace();
