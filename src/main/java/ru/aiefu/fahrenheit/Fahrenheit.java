@@ -7,18 +7,21 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
+import ru.aiefu.fahrenheit.mixin.SPIManagerMixinsAcc;
 import ru.aiefu.fahrenheit.statuseffects.*;
 
 import java.io.IOException;
@@ -30,7 +33,7 @@ import java.util.Map;
 public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
 	public static ConfigInstance config_instance;
-	public static Map<Identifier, Map<String, float[]>> blocks_cfg = new HashMap<>();
+	public static Map<Identifier, Map<String, BlockDataStorage>> blocks_cfg = new HashMap<>();
 
 	//Items
 	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
@@ -87,8 +90,14 @@ public class Fahrenheit implements ModInitializer {
 				Files.createDirectory(Paths.get("./config/fahrenheit"));
 			}
 			IOManager ioManager = new IOManager();
-			if(!Files.exists(Paths.get("./config/fahrenheit/blocks-data.json"))){
+			if(!Files.exists(Paths.get("./config/fahrenheit/config.json"))){
 				ioManager.genDefaultCfg();
+			}
+			if(!Files.exists(Paths.get("./config/fahrenheit/blocks-data.json"))){
+				ioManager.genBlocksCfg();
+			}
+			if(!Files.exists(Paths.get("./config/fahrenheit/biome-config.json"))){
+				ioManager.genBiomeCfg();
 			}
 			ioManager.readBlocksCfg();
 		}
@@ -98,8 +107,8 @@ public class Fahrenheit implements ModInitializer {
 	}
 	public void serverSidePackets(){
 		ServerPlayNetworking.registerGlobalReceiver(craftID("drink_from_water_block"), (server, player, handler, buf, responseSender) -> {
-			HitResult result = player.raycast(20.0D, 0.0F, true);
-			if(result.getType() == HitResult.Type.BLOCK && player.world.getBlockState(new BlockPos(result.getPos())).getBlock() == Blocks.WATER){
+			BlockHitResult raycast = (BlockHitResult) player.raycast(2.D, 0.0F, true);
+			if(!((SPIManagerMixinsAcc)player.interactionManager).isMining() && raycast.getType() == HitResult.Type.BLOCK && player.world.getBlockState(raycast.getBlockPos()).getBlock() == Blocks.WATER){
 				EnvironmentManager enviroManager = ((IPlayerMixins)player).getEnviroManager();
 				enviroManager.addWaterLevels(2, 1);
 				if(enviroManager.getTemp() > 10) {
@@ -108,5 +117,18 @@ public class Fahrenheit implements ModInitializer {
 				player.world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_GENERIC_DRINK, SoundCategory.NEUTRAL, 1.0F, 1.0F);
 			}
 		});
+	}
+	public static BlockHitResult raycast(World world, PlayerEntity player, RaycastContext.FluidHandling fluidHandling) {
+		float f = player.pitch;
+		float g = player.yaw;
+		Vec3d vec3d = player.getCameraPosVec(1.0F);
+		float h = MathHelper.cos(-g * 0.017453292F - 3.1415927F);
+		float i = MathHelper.sin(-g * 0.017453292F - 3.1415927F);
+		float j = -MathHelper.cos(-f * 0.017453292F);
+		float k = MathHelper.sin(-f * 0.017453292F);
+		float l = i * j;
+		float n = h * j;
+		Vec3d vec3d2 = vec3d.add((double)l * 5.0D, (double)k * 5.0D, (double)n * 5.0D);
+		return world.raycast(new RaycastContext(vec3d, vec3d2, RaycastContext.ShapeType.OUTLINE, fluidHandling, player));
 	}
 }

@@ -4,10 +4,11 @@
   "package": "ru.aiefu.fahrenheit.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ClientPlayerInteractionManagerMixins",
     "LivingEntityMixins",
+    "MinecraftClientMixins",
     "PlayerEntityMixins",
-    "PotionItemMixins"
+    "PotionItemMixins",
+    "SPIManagerMixinsAcc"
   ],
   "client": [
     "InGameHudMixins"

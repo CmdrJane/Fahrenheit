@@ -1,10 +1,15 @@
 package ru.aiefu.fahrenheit;
 
-import com.google.common.collect.TreeMultimap;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public class BlockDataStorage {
-    private Map<String, float []> blockData = new HashMap<>();
+    public float closeRange;
+    public float closeRangeTemp;
+    public float longRange;
+    public float longRangeTemp;
+
+    public BlockDataStorage(float closeRange, float closeRangeTemp, float longRange, float longRangeTemp) {
+        this.closeRange = closeRange;
+        this.closeRangeTemp = closeRangeTemp;
+        this.longRange = longRange;
+        this.longRangeTemp = longRangeTemp;
+    }
 }

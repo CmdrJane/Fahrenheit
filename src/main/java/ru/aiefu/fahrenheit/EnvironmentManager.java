@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnvironmentManager {
+    public static HashMap<Identifier, BiomeDataStorage> biomeDataMap;
     private int temp = 0;
     private float tempProgress = 0;
     private int tickTimer = 0;
@@ -70,6 +71,7 @@ public class EnvironmentManager {
             boolean blChill = player.hasStatusEffect(Fahrenheit.CHILL_EFFECT);
             boolean blWarm = player.hasStatusEffect(Fahrenheit.WARM_EFFECT);
             boolean isWet = player.isWet();
+            System.out.println(world.getBiome(playerPos) == world.getRegistryManager().get(Registry.BIOME_KEY).get(new Identifier("swamp")));
 
 
             if(playerDim == dimTypeReg.get(DimensionType.THE_NETHER_REGISTRY_KEY) && !blChill){
@@ -122,7 +124,7 @@ public class EnvironmentManager {
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.THIN_AIR, 15));
             }
             if(!Fahrenheit.blocks_cfg.isEmpty()) {
-                Map<Identifier, Map<String, float[]>> tempMap = Fahrenheit.blocks_cfg;
+                Map<Identifier, Map<String, BlockDataStorage>> tempMap = Fahrenheit.blocks_cfg;
                 for (BlockPos pos : posIterable) {
                     Identifier id = Registry.BLOCK.getId(world.getBlockState(pos).getBlock());
                     if(tempMap.containsKey(id)){
@@ -165,30 +167,37 @@ public class EnvironmentManager {
         }
     }
     public void writeToTag(CompoundTag tag){
-        tag.putInt("temperature", this.temp);
-        tag.putInt("water", this.water);
-        tag.putInt("hydration", this.hydration);
-        tag.putInt("thirstTimer", this.thirstTimer);
-        tag.putFloat("tempProgress", this.tempProgress);
-        tag.putFloat("waterProgress", this.waterProgress);
+        CompoundTag fh_tag = new CompoundTag();
+        fh_tag.putInt("temperature", this.temp);
+        fh_tag.putInt("water", this.water);
+        fh_tag.putInt("hydration", this.hydration);
+        fh_tag.putInt("thirstTimer", this.thirstTimer);
+        fh_tag.putFloat("tempProgress", this.tempProgress);
+        fh_tag.putFloat("waterProgress", this.waterProgress);
+        tag.put("Fahrenheit_Data", fh_tag);
     }
     public void readFromTag(CompoundTag tag){
-        this.temp = tag.getInt("temperature");
-        this.water = tag.getInt("water");
-        this.hydration = tag.getInt("hydration");
-        this.thirstTimer = tag.getInt("thirstTimer");
-        this.tempProgress = tag.getFloat("tempProgress");
-        this.waterProgress = tag.getFloat("waterProgress");
+        CompoundTag fh_tag = (CompoundTag) tag.get("Fahrenheit_Data");
+        if(fh_tag != null) {
+            this.temp = fh_tag.getInt("temperature");
+            this.water = fh_tag.getInt("water");
+            this.hydration = fh_tag.getInt("hydration");
+            this.thirstTimer = fh_tag.getInt("thirstTimer");
+            this.tempProgress = fh_tag.getFloat("tempProgress");
+            this.waterProgress = fh_tag.getFloat("waterProgress");
+        }
     }
 
-    public float call(Map<String, float[]> map, BlockState state, PlayerEntity player, BlockPos pos){
-        for(String p : map.keySet()){
-            float [] values = map.get(p).length > 1 ? map.get(p) : new float[]{1.0F, 1.0F};
-            if(p.equals("default")){
-                return Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) <= values[1] ? values[0] : values[0] / 2;
-            } else if (state.get(BooleanProperty.of(p))){
-                return Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)) <= values[1] ? values[0] : values[0] / 2;
+    public float call(Map<String, BlockDataStorage> map, BlockState state, PlayerEntity player, BlockPos pos){
+        float distance = (float) Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
+        for(Map.Entry<String, BlockDataStorage> e : map.entrySet()){
+            if (state.get(BooleanProperty.of(e.getKey()))){
+                return  distance <= e.getValue().closeRange ? e.getValue().closeRangeTemp : e.getValue().longRangeTemp;
             }
+        }
+        if(map.containsKey("default")){
+            BlockDataStorage storage = map.get("default");
+            return distance <= storage.closeRange ? storage.closeRangeTemp : storage.longRangeTemp;
         }
         return 0.0F;
     };
