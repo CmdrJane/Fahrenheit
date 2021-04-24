@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -20,6 +21,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import ru.aiefu.fahrenheit.EnvironmentManager;
+import ru.aiefu.fahrenheit.Fahrenheit;
 import ru.aiefu.fahrenheit.IPlayerMixins;
 
 public class WaterFlaskItem extends Item {
@@ -91,6 +93,9 @@ public class WaterFlaskItem extends Item {
             enviroManager.addWaterLevels(2, 2);
             if(enviroManager.getTemp() >= 10) {
                 enviroManager.addTempLevel(-2);
+            }
+            if(!user.world.isClient) {
+                Fahrenheit.sendSyncPacket((ServerPlayerEntity) user, enviroManager.getTemp(), enviroManager.getWater());
             }
             world.playSound(null, user.getBlockPos(), this.getDrinkSound(), SoundCategory.NEUTRAL, 1.0F, 1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
         }

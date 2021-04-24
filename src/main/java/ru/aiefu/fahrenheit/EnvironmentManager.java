@@ -10,7 +10,9 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.MutableRegistry;
@@ -105,10 +107,8 @@ public class EnvironmentManager {
                     }
                     else if (biomeTemp >= 1.5F){
                         tmp = isDay ? Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.dayTemp * precision : Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.nightTemp * precision;
-                        if(world.getBiome(playerPos).getCategory().equals(Biome.Category.DESERT)){
-                            if(!world.isDay()) {
-                                tmp = -Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.dayTemp * precision;
-                            }
+                        if(!isDay && world.getBiome(playerPos).getCategory().equals(Biome.Category.DESERT)){
+                            tmp = -Fahrenheit.defaultDataStorage.VERY_HOT_BIOMES.dayTemp * precision;
                         }
                     }
                     break;
@@ -124,9 +124,8 @@ public class EnvironmentManager {
                     }
                     break;
                 //case 2:
-
             }
-            if(playerPos.getY() < player.world.getSeaLevel() - 6 || (!world.isSkyVisible(playerPos.add(0, 0.7, 0)) && checkStoneNearby(player, BlockPos.iterateOutwards(playerPos, 1,2,1)))){
+            if(playerPos.getY() < player.world.getSeaLevel() - 6 || (!world.isSkyVisible(playerPos.add(0, player.getStandingEyeHeight(), 0)) && checkStoneNearby(player, BlockPos.iterateOutwards(playerPos, 1,2,1)))){
                 tmp = -0.015F * precision;
             }
 
@@ -135,7 +134,7 @@ public class EnvironmentManager {
                 System.out.println(Fahrenheit.config_instance.wetTemp * precision);
                 tmp = Fahrenheit.config_instance.waterFlatChill ? Fahrenheit.config_instance.wetTemp * precision : tmp - Fahrenheit.config_instance.wetTemp * precision;
             }
-            if(player.getEyeY() >= Fahrenheit.config_instance.thinAirThreshold && !Fahrenheit.config_instance.disableThinAir){
+            if(!Fahrenheit.config_instance.disableThinAir && player.getEyeY() >= Fahrenheit.config_instance.thinAirThreshold){
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.THIN_AIR, 15));
             }
             if(!Fahrenheit.blocks_cfg.isEmpty()) {
@@ -168,15 +167,9 @@ public class EnvironmentManager {
                 }
             }
 
-            ServerPlayerEntity serverPlayer = player.getServer().getPlayerManager().getPlayer(player.getUuid());
-            CompoundTag data = new CompoundTag();
-            data.putInt("temp", this.temp);
-            data.putInt("water", this.water);
-            if(serverPlayer != null) {
-                ServerPlayNetworking.send(serverPlayer, Fahrenheit.craftID("sync_temp"), new PacketByteBuf(Unpooled.buffer()).writeCompoundTag(data));
-            }
+            Fahrenheit.sendSyncPacket((ServerPlayerEntity) player, this.temp, this.water);
             long endTime = System.nanoTime();
-            System.out.println("That took " + (endTime - startTime) + " nanos");
+            player.sendSystemMessage(new LiteralText("That took " + (endTime - startTime) + " nanos"), Util.NIL_UUID);
             System.out.println(this.temp +"/" + this.tempProgress);
             System.out.println(this.water);
         }
@@ -206,7 +199,7 @@ public class EnvironmentManager {
     public float call(Map<String, BlockDataStorage> map, BlockState state, PlayerEntity player, BlockPos pos){
         float distance = (float) Math.sqrt(player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
         for(Map.Entry<String, BlockDataStorage> e : map.entrySet()){
-            if (!e.getKey().equals("default") && state.get(BooleanProperty.of(e.getKey()))){
+            if (state.contains(BooleanProperty.of(e.getKey())) && state.get(BooleanProperty.of(e.getKey()))){
                 return  distance <= e.getValue().closeRange ? e.getValue().closeRangeTemp : e.getValue().longRangeTemp;
             }
         }
@@ -244,7 +237,9 @@ public class EnvironmentManager {
         this.hydration = Math.min(this.hydration + level, 10);
     }
     public void addWaterProgress(float waterProgress){
-        this.waterProgress += Math.max(waterProgress, 0);
+        if(Fahrenheit.config_instance.enableThirst) {
+            this.waterProgress += Math.max(waterProgress, 0);
+        }
     }
 
     public void addTempProgress(float temp){
@@ -255,6 +250,9 @@ public class EnvironmentManager {
     }
     public int getTemp(){
         return this.temp;
+    }
+    public int getWater(){
+        return this.water;
     }
     public void setTemp(int temp){
         this.temp = temp;

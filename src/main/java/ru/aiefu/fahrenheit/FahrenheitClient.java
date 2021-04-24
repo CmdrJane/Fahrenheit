@@ -13,11 +13,8 @@ public class FahrenheitClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(Fahrenheit.craftID("sync_temp"), (client, handler, buf, responseSender) -> {
-            CompoundTag tag = buf.readCompoundTag();
-            if(tag != null){
-                fahrenheit_temp_status = tag.getInt("temp");
-                fahrenheit_water_status = tag.getInt("water");
-            }
+            fahrenheit_temp_status = buf.readInt();
+            fahrenheit_water_status = buf.readInt();
         });
     }
 }

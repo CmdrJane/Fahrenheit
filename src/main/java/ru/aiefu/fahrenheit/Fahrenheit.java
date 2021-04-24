@@ -1,5 +1,6 @@
 package ru.aiefu.fahrenheit;
 
+import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -12,6 +13,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
@@ -22,6 +25,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import ru.aiefu.fahrenheit.commands.FahrenheitReloadCfg;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
@@ -127,21 +131,14 @@ public class Fahrenheit implements ModInitializer {
 				if(enviroManager.getTemp() > 10) {
 					enviroManager.addTempLevel(-1);
 				}
+				sendSyncPacket(player, enviroManager.getTemp(), enviroManager.getWater());
 				player.world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_GENERIC_DRINK, SoundCategory.NEUTRAL, 1.0F, 1.0F);
 			}
 		});
 	}
-	public static BlockHitResult raycast(World world, PlayerEntity player, RaycastContext.FluidHandling fluidHandling) {
-		float f = player.pitch;
-		float g = player.yaw;
-		Vec3d vec3d = player.getCameraPosVec(1.0F);
-		float h = MathHelper.cos(-g * 0.017453292F - 3.1415927F);
-		float i = MathHelper.sin(-g * 0.017453292F - 3.1415927F);
-		float j = -MathHelper.cos(-f * 0.017453292F);
-		float k = MathHelper.sin(-f * 0.017453292F);
-		float l = i * j;
-		float n = h * j;
-		Vec3d vec3d2 = vec3d.add((double)l * 5.0D, (double)k * 5.0D, (double)n * 5.0D);
-		return world.raycast(new RaycastContext(vec3d, vec3d2, RaycastContext.ShapeType.OUTLINE, fluidHandling, player));
+	public static void sendSyncPacket(@Nullable ServerPlayerEntity player, int temp, int water){
+		if(player != null) {
+			ServerPlayNetworking.send(player, Fahrenheit.craftID("sync_temp"), new PacketByteBuf(Unpooled.buffer().writeInt(temp).writeInt(water)));
+		}
 	}
 }
