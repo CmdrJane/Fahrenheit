@@ -1,12 +1,9 @@
 package ru.aiefu.fahrenheit;
 
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.tag.BlockTags;
@@ -131,7 +128,6 @@ public class EnvironmentManager {
 
             if (isWet && !blWarm) {
                 player.addStatusEffect(new StatusEffectInstance(Fahrenheit.WET_EFFECT, 120));
-                System.out.println(Fahrenheit.config_instance.wetTemp * precision);
                 tmp = Fahrenheit.config_instance.waterFlatChill ? Fahrenheit.config_instance.wetTemp * precision : tmp - Fahrenheit.config_instance.wetTemp * precision;
             }
             if(!Fahrenheit.config_instance.disableThinAir && player.getEyeY() >= Fahrenheit.config_instance.thinAirThreshold){

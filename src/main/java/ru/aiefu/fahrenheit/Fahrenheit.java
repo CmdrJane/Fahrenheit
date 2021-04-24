@@ -28,6 +28,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import ru.aiefu.fahrenheit.commands.FahrenheitReloadCfg;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
+import ru.aiefu.fahrenheit.items.drinks.ItemDrinkable;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.mixin.SPIManagerMixinsAcc;
 import ru.aiefu.fahrenheit.statuseffects.*;
@@ -48,6 +49,10 @@ public class Fahrenheit implements ModInitializer {
 	//Items
 	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
 	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 800);
+	public static final Item APPLE_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),3,4,9,2);
+	public static final Item MELON_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(2).build()).maxCount(16),4,6,9,3);
+	public static final Item BERRIES_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(2).build()).maxCount(16),4,5,6,4);
+	public static final Item CARROT_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(3).build()).maxCount(16),3,4,8,3);
 
 	//StatusEffects
 	public static final StatusEffect WARM_EFFECT = new WarmEffect();
@@ -83,6 +88,10 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
 		Registry.register(Registry.ITEM, craftID("water_flask"), WATER_FLASK);
 		Registry.register(Registry.ITEM, craftID("metal_water_flask"), METAL_WATER_FLASK);
+		Registry.register(Registry.ITEM, craftID("apple_juice_bottle"), APPLE_JUICE_BOTTLE);
+		Registry.register(Registry.ITEM, craftID("melon_juice_bottle"), MELON_JUICE_BOTTLE);
+		Registry.register(Registry.ITEM, craftID("berries_juice_bottle"), BERRIES_JUICE_BOTTLE);
+		Registry.register(Registry.ITEM, craftID("carrot_juice_bottle"), CARROT_JUICE_BOTTLE);
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			GetDistanceTo.register(dispatcher);
 			FahrenheitReloadCfg.register(dispatcher);
