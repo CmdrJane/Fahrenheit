@@ -31,7 +31,8 @@
     "fabricloader": ">=0.7.4",
     "fabric": "0.32.5",
     "minecraft": "1.16.x",
-    "nbtcrafting": "2.0.7+mc1.16.4"
+    "nbtcrafting": ">=2.0.11+mc1.16.4",
+    "trinkets": "2.6.7"
   },
   "suggests": {
     "another-mod": "*"

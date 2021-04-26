@@ -148,16 +148,27 @@ public class EnvironmentManager {
                     }
                 }
             }
-            if(blWarm && this.temp < 4){
-                tmp = 0.04F * precision;
+
+            if(player.hasStatusEffect(Fahrenheit.REFRESHING_EFFECT) && this.temp > 2 && tmp > 0){
+                tmp = 0;
             }
-            else if(blChill && this.temp > 6){
-                tmp = -0.04F * precision;
+
+            if(blWarm){
+                if(tmp < 0)
+                tmp = 0;
+                if(this.temp < 4)
+                tmp = 0.08F * precision;
+            }
+            else if(blChill){
+                if(tmp > 0)
+                tmp = 0;
+                if(this.temp > 6)
+                tmp = -0.08F * precision;
             }
             this.tempProgress += tmp;
             if(Fahrenheit.config_instance.enableThirst) {
                 if (this.temp >= 10) {
-                    this.waterProgress += 0.025F * precision;
+                    this.waterProgress += 0.045F * precision;
                 } else {
                     this.waterProgress += 0.005F * precision;
                 }
@@ -236,6 +247,9 @@ public class EnvironmentManager {
         if(Fahrenheit.config_instance.enableThirst) {
             this.waterProgress += Math.max(waterProgress, 0);
         }
+    }
+    public void setWater(int water){
+        this.water = MathHelper.clamp(water, 0, 20);
     }
 
     public void addTempProgress(float temp){

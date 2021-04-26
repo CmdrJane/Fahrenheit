@@ -40,7 +40,6 @@ public class WaterFlaskItem extends Item {
             tag.putInt("water", 0);
         }
         int water = tag.getInt("water");
-        System.out.println(water);
         BlockHitResult result = raycast(world, user, RaycastContext.FluidHandling.SOURCE_ONLY);
         BlockState state = world.getBlockState(result.getBlockPos());
         if(result.getType() == HitResult.Type.BLOCK && water < this.waterCapacity){
@@ -57,7 +56,7 @@ public class WaterFlaskItem extends Item {
                 return TypedActionResult.success(stack);
             }
         }
-        else if(water >= 100){
+        else if(water >= 100 && ((IPlayerMixins)user).getEnviroManager().getTemp() < 20){
             return super.use(world, user, hand);
         }
         return TypedActionResult.pass(stack);

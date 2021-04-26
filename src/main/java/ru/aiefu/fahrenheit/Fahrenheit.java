@@ -1,17 +1,17 @@
 package ru.aiefu.fahrenheit;
 
+import dev.emi.trinkets.api.SlotGroups;
+import dev.emi.trinkets.api.Slots;
+import dev.emi.trinkets.api.TrinketSlots;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,16 +20,14 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import ru.aiefu.fahrenheit.commands.DebugCommand;
 import ru.aiefu.fahrenheit.commands.FahrenheitReloadCfg;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
 import ru.aiefu.fahrenheit.items.drinks.ItemDrinkable;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
+import ru.aiefu.fahrenheit.items.food.IceCream;
 import ru.aiefu.fahrenheit.mixin.SPIManagerMixinsAcc;
 import ru.aiefu.fahrenheit.statuseffects.*;
 
@@ -46,14 +44,6 @@ public class Fahrenheit implements ModInitializer {
 	public static HashMap<Identifier, BiomeDataStorage> biomeDataMap = new HashMap<>();
 	public static DefaultDataStorage defaultDataStorage;
 
-	//Items
-	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
-	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 800);
-	public static final Item APPLE_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),3,4,9,2);
-	public static final Item MELON_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(2).build()).maxCount(16),4,6,9,3);
-	public static final Item BERRIES_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(2).build()).maxCount(16),4,5,6,4);
-	public static final Item CARROT_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(3).build()).maxCount(16),3,4,8,3);
-
 	//StatusEffects
 	public static final StatusEffect WARM_EFFECT = new WarmEffect();
 	public static final StatusEffect CHILL_EFFECT = new ChillEffect();
@@ -61,7 +51,7 @@ public class Fahrenheit implements ModInitializer {
 	public static final StatusEffect HEAT_STROKE = new HeatStrokeEffect();
 	public static final StatusEffect HYPOTHERMIA = new Hypothermia();
 	public static final StatusEffect SATURATION_EFFECT = new SaturationEffect();
-	public static final StatusEffect REFRESHIN_EFFECT = new RefreshingEffect();
+	public static final StatusEffect REFRESHING_EFFECT = new RefreshingEffect();
 	public static final StatusEffect DEADLY_COLD_EFFECT = new DeadlyColdEffect();
 	public static final StatusEffect DEADLY_HEAT_EFFECT = new DeadlyHeatEffect();
 	public static final StatusEffect THIN_AIR = new ThinAirEffect();
@@ -72,6 +62,14 @@ public class Fahrenheit implements ModInitializer {
 	public static final DamageSource DEADLY_HEAT_DMG = new DamageSourcesCustom("deadly_heat_source").setBypassesArmor();
 	public static final DamageSource DEADLY_COLD_DMG = new DamageSourcesCustom("deadly_cold_source").setBypassesArmor();
 	public static final DamageSource DEHYDRATION = new DamageSourcesCustom("dehydration_source").setBypassesArmor();
+	//Items
+	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
+	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 800);
+	public static final Item APPLE_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(16),3,4,9,-2, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1200, 0}));
+	public static final Item MELON_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(16),4,6,9,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{2600, 0}));
+	public static final Item BERRIES_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),4,5,6,-4, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1800, 0}, StatusEffects.JUMP_BOOST, new int[]{400, 2}));
+	public static final Item CARROT_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),3,4,8,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1500, 0}, StatusEffects.NIGHT_VISION, new int[]{800, 0}));
+	public static final Item ICE_CREAM = new IceCream(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().hunger(2).alwaysEdible().build()).maxCount(16),-4);
 
 	@Override
 	public void onInitialize() {
@@ -82,7 +80,7 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.STATUS_EFFECT, craftID("heat_stroke"), HEAT_STROKE);
 		Registry.register(Registry.STATUS_EFFECT, craftID("hypothermia"), HYPOTHERMIA);
 		Registry.register(Registry.STATUS_EFFECT, craftID("saturation"), SATURATION_EFFECT);
-		Registry.register(Registry.STATUS_EFFECT, craftID("refreshing"), REFRESHIN_EFFECT);
+		Registry.register(Registry.STATUS_EFFECT, craftID("refreshing"), REFRESHING_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_cold"), DEADLY_COLD_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("deadly_heat"), DEADLY_HEAT_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("thin_air"), THIN_AIR);
@@ -92,9 +90,12 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.ITEM, craftID("melon_juice_bottle"), MELON_JUICE_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("berries_juice_bottle"), BERRIES_JUICE_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("carrot_juice_bottle"), CARROT_JUICE_BOTTLE);
+		Registry.register(Registry.ITEM, craftID("ice_cream"), ICE_CREAM);
+		TrinketSlots.addSlot(SlotGroups.LEGS, Slots.BELT, new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png"));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			GetDistanceTo.register(dispatcher);
 			FahrenheitReloadCfg.register(dispatcher);
+			DebugCommand.register(dispatcher);
 		});
 		serverSidePackets();
 	}
@@ -134,8 +135,8 @@ public class Fahrenheit implements ModInitializer {
 	public void serverSidePackets(){
 		ServerPlayNetworking.registerGlobalReceiver(craftID("drink_from_water_block"), (server, player, handler, buf, responseSender) -> {
 			BlockHitResult raycast = (BlockHitResult) player.raycast(2.D, 0.0F, true);
-			if(!((SPIManagerMixinsAcc)player.interactionManager).isMining() && raycast.getType() == HitResult.Type.BLOCK && player.world.getBlockState(raycast.getBlockPos()).getBlock() == Blocks.WATER){
-				EnvironmentManager enviroManager = ((IPlayerMixins)player).getEnviroManager();
+			EnvironmentManager enviroManager = ((IPlayerMixins)player).getEnviroManager();
+			if(enviroManager.getWater() < 20 && !((SPIManagerMixinsAcc)player.interactionManager).isMining() && raycast.getType() == HitResult.Type.BLOCK && player.world.getBlockState(raycast.getBlockPos()).getBlock() == Blocks.WATER){
 				enviroManager.addWaterLevels(2, 1);
 				if(enviroManager.getTemp() > 10) {
 					enviroManager.addTempLevel(-1);
