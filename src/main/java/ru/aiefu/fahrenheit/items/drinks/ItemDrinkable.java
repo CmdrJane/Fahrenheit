@@ -1,5 +1,6 @@
 package ru.aiefu.fahrenheit.items.drinks;
 
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -11,6 +12,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -21,6 +26,7 @@ import ru.aiefu.fahrenheit.Fahrenheit;
 import ru.aiefu.fahrenheit.IPlayerMixins;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ItemDrinkable extends Item {
@@ -94,5 +100,14 @@ public class ItemDrinkable extends Item {
     @Override
     public SoundEvent getEatSound() {
         return SoundEvents.ENTITY_GENERIC_DRINK;
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        if(effects != null){
+            for(StatusEffect e : effects.keySet()){
+                tooltip.add(new LiteralText(e.getName().getString()).formatted(Formatting.BLUE));
+            }
+        }
     }
 }

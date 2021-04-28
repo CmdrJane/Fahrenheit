@@ -199,8 +199,8 @@ public class Fahrenheit implements ModInitializer {
 	public void addTradeOffers(){
 		TradeOffers.Factory[] original = TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.ARMORER).get(5);
 		TradeOffers.Factory[] copy = Arrays.copyOf(original, original.length + 2);
-		copy[original.length] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), new ItemStack(Items.PACKED_ICE, 64), new ItemStack(ICE_CUBE),1,1, 1.0F);
-		copy[original.length + 1] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), new ItemStack(Items.MAGMA_BLOCK, 64), new ItemStack(MAGMA_SHARD),1,1, 1.0F);
+		copy[original.length] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), new ItemStack(Items.NETHER_STAR, 4), new ItemStack(ICE_CUBE),1,1, 1.0F);
+		copy[original.length + 1] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), new ItemStack(Items.NETHER_STAR, 4), new ItemStack(MAGMA_SHARD),1,1, 1.0F);
 		TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.ARMORER).put(5, copy);
 		TradeOffers.Factory[] originalCleric = TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.CLERIC).get(1);
 		TradeOffers.Factory[] copy1 = Arrays.copyOf(originalCleric, originalCleric.length + 1);

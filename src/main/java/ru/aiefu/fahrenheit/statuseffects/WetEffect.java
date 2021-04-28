@@ -15,10 +15,10 @@ public class WetEffect extends StatusEffect {
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
         if(entity instanceof ServerPlayerEntity && !entity.hasStatusEffect(Fahrenheit.WARM_EFFECT)){
-            ((ServerPlayerEntity) entity).addExhaustion(0.05F);
+            ((ServerPlayerEntity) entity).addExhaustion(0.02F);
         }
         else if(entity instanceof ServerPlayerEntity && entity.hasStatusEffect(Fahrenheit.CHILL_EFFECT)){
-            ((IPlayerMixins)entity).getEnviroManager().addTempProgress(-0.3F);
+            ((IPlayerMixins)entity).getEnviroManager().addTempProgress(-0.08F);
         }
     }
 

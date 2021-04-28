@@ -1,5 +1,6 @@
 package ru.aiefu.fahrenheit.items;
 
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Item;
@@ -8,9 +9,14 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import ru.aiefu.fahrenheit.Fahrenheit;
+
+import java.util.List;
 
 public class FireMixItem extends Item {
     public FireMixItem(Settings settings) {
@@ -50,5 +56,10 @@ public class FireMixItem extends Item {
     @Override
     public SoundEvent getEatSound() {
         return SoundEvents.ENTITY_GENERIC_DRINK;
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        tooltip.add(new TranslatableText("description.fahrenheit.fire_mix"));
     }
 }
