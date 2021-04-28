@@ -7,16 +7,20 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
+import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
+import net.minecraft.loot.LootTable;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -25,6 +29,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.village.TradeOffer;
+import net.minecraft.village.TradeOffers;
+import net.minecraft.village.VillagerProfession;
 import org.jetbrains.annotations.Nullable;
 import ru.aiefu.fahrenheit.blocks.FermenterBlock;
 import ru.aiefu.fahrenheit.blocks.FermenterEntity;
@@ -36,14 +43,15 @@ import ru.aiefu.fahrenheit.items.IceCube;
 import ru.aiefu.fahrenheit.items.drinks.ItemDrinkable;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.items.food.IceCream;
-import ru.aiefu.fahrenheit.mixin.SPIManagerMixinsAcc;
 import ru.aiefu.fahrenheit.statuseffects.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class Fahrenheit implements ModInitializer {
 	public static final String MOD_ID = "fahrenheit";
@@ -78,7 +86,10 @@ public class Fahrenheit implements ModInitializer {
 	public static final Item BERRIES_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),4,5,6,-4, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1800, 0}, StatusEffects.JUMP_BOOST, new int[]{400, 2}), false);
 	public static final Item CARROT_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),3,4,8,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1500, 0}, StatusEffects.NIGHT_VISION, new int[]{800, 0}),false);
 	public static final Item APPLE_CIDER_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().hunger(0).alwaysEdible().build()).maxCount(16), 2, 2, -4, 4, null, true);
-	public static final Item ICE_CREAM = new IceCream(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().hunger(2).alwaysEdible().build()).maxCount(16),-4);
+	public static final Item WAFFLE = new Item(new FabricItemSettings().group(ItemGroup.MISC).food(new FoodComponent.Builder().hunger(5).saturationModifier(0.9F).build()).maxCount(16));
+	public static final Item JUICER = new Item(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
+	public static final Item MIXER = new Item(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
+	public static final Item ICE_CREAM = new IceCream(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().hunger(2).alwaysEdible().build()).maxCount(16),-2);
 	public static final Item ICE_CUBE = new IceCube(new FabricItemSettings().group(ItemGroup.COMBAT).maxCount(1));
 	public static final Item MAGMA_SHARD = new MagmaShard(new FabricItemSettings().group(ItemGroup.COMBAT).maxCount(1));
 	//Blocks
@@ -109,9 +120,12 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.ITEM, craftID("berries_juice_bottle"), BERRIES_JUICE_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("carrot_juice_bottle"), CARROT_JUICE_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("apple_cider_bottle"), APPLE_CIDER_BOTTLE);
+		Registry.register(Registry.ITEM, craftID("waffle"), WAFFLE);
 		Registry.register(Registry.ITEM, craftID("ice_cream"), ICE_CREAM);
 		Registry.register(Registry.ITEM, craftID("ice_cube"), ICE_CUBE);
 		Registry.register(Registry.ITEM, craftID("magma_shard"), MAGMA_SHARD);
+		Registry.register(Registry.ITEM, craftID("juicer"), JUICER);
+		Registry.register(Registry.ITEM, craftID("mixer"), MIXER);
 		//Registry.register(Registry.ITEM, craftID("fermenter"), FERMENTER_ITEM);
 		TrinketSlots.addSlot(SlotGroups.LEGS, Slots.BELT, new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png"));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -119,6 +133,7 @@ public class Fahrenheit implements ModInitializer {
 			FahrenheitReloadCfg.register(dispatcher);
 			DebugCommand.register(dispatcher);
 		});
+		addTradeOffers();
 		serverSidePackets();
 	}
 	public static Identifier craftID(String id){
@@ -158,7 +173,7 @@ public class Fahrenheit implements ModInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(craftID("drink_from_water_block"), (server, player, handler, buf, responseSender) -> {
 			BlockHitResult raycast = (BlockHitResult) player.raycast(2.D, 0.0F, true);
 			EnvironmentManager enviroManager = ((IPlayerMixins)player).getEnviroManager();
-			if(enviroManager.getWater() < 20 && !((SPIManagerMixinsAcc)player.interactionManager).isMining() && raycast.getType() == HitResult.Type.BLOCK && player.world.getBlockState(raycast.getBlockPos()).getBlock() == Blocks.WATER){
+			if(enviroManager.getWater() < 20 && raycast.getType() == HitResult.Type.BLOCK && player.world.getBlockState(raycast.getBlockPos()).getBlock() == Blocks.WATER){
 				enviroManager.addWaterLevels(2, 1);
 				if(enviroManager.getTemp() > 10) {
 					enviroManager.addTempLevel(-1);
@@ -172,5 +187,28 @@ public class Fahrenheit implements ModInitializer {
 		if(player != null) {
 			ServerPlayNetworking.send(player, Fahrenheit.craftID("sync_temp"), new PacketByteBuf(Unpooled.buffer().writeInt(temp).writeInt(water)));
 		}
+	}
+	public void addTradeOffers(){
+		TradeOffers.Factory[] original = TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.ARMORER).get(5);
+		TradeOffers.Factory[] copy = Arrays.copyOf(original, original.length + 2);
+		copy[original.length] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), new ItemStack(Items.PACKED_ICE, 64), new ItemStack(ICE_CUBE),1,1, 1.0F);
+		copy[original.length + 1] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 32), new ItemStack(Items.MAGMA_BLOCK, 64), new ItemStack(MAGMA_SHARD),1,1, 1.0F);
+		TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.ARMORER).put(5, copy);
+		TradeOffers.Factory[] originalCleric = TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.CLERIC).get(1);
+		TradeOffers.Factory[] copy1 = Arrays.copyOf(originalCleric, originalCleric.length + 1);
+		copy1[originalCleric.length] = (entity, random) -> new TradeOffer(new ItemStack(Items.EMERALD, 1), new ItemStack(APPLE_CIDER_BOTTLE, 4), 32,1, 1.0F);
+		TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(VillagerProfession.CLERIC).put(1, copy1);
+	}
+	public void addTradeOffer(VillagerProfession profession, int tier, ItemStack input, ItemStack output, int maxUses, int rewardExp, float priceMultiplier){
+		TradeOffers.Factory[] original = TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(profession).get(tier);
+		TradeOffers.Factory[] copy = Arrays.copyOf(original, original.length + 1);
+		copy[original.length] = (entity, random) -> new TradeOffer(input, output, maxUses, rewardExp, priceMultiplier);
+		TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(profession).put(tier, copy);
+	}
+	public void addTradeOffer(VillagerProfession profession, int tier, ItemStack input1, ItemStack input2, ItemStack output, int maxUses, int rewardExp, float priceMultiplier){
+		TradeOffers.Factory[] original = TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(profession).get(tier);
+		TradeOffers.Factory[] copy = Arrays.copyOf(original, original.length + 1);
+		copy[original.length] = (entity, random) -> new TradeOffer(input1, input2, output, maxUses, rewardExp, priceMultiplier);
+		TradeOffers.PROFESSION_TO_LEVELED_TRADE.get(profession).put(tier, copy);
 	}
 }

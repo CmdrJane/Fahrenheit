@@ -20,7 +20,8 @@ public class FermenterEntity extends BlockEntity implements Tickable, SidedInven
     protected DefaultedList<ItemStack> inventory;
 
     public FermenterEntity() {
-        super(Fahrenheit.FERMENTER_BLOCK_ENTITY);
+        super(null);
+        //super(Fahrenheit.FERMENTER_BLOCK_ENTITY);
         this.inventory = DefaultedList.ofSize(3, ItemStack.EMPTY);
     }
 

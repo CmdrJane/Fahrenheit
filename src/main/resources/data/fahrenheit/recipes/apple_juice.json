@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "apple_juice",
+  "ingredients": [
+    {
+      "item": "fahrenheit:juicer",
+      "remainder": { "item": "fahrenheit:juicer" }
+    },
+    {
+      "item": "minecraft:glass_bottle"
+    },
+    {
+      "item": "minecraft:apple"
+    }
+  ],
+  "result": {
+    "item": "fahrenheit:apple_juice_bottle"
+  }
+}

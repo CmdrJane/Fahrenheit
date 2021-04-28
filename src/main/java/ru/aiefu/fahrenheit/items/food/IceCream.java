@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import ru.aiefu.fahrenheit.EnvironmentManager;
 import ru.aiefu.fahrenheit.Fahrenheit;
 import ru.aiefu.fahrenheit.IPlayerMixins;
 
@@ -20,8 +21,9 @@ public class IceCream extends Item {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         if(user instanceof ServerPlayerEntity && !user.world.isClient) {
-            ((IPlayerMixins) user).getEnviroManager().addTempLevel(temp);
-            user.addStatusEffect(new StatusEffectInstance(Fahrenheit.CHILL_EFFECT, 800));
+            EnvironmentManager environmentManager = ((IPlayerMixins) user).getEnviroManager();
+            environmentManager.addTempLevel(temp);
+            user.addStatusEffect(new StatusEffectInstance(Fahrenheit.CHILL_EFFECT, 400));
         }
         return super.finishUsing(stack, world, user);
     }

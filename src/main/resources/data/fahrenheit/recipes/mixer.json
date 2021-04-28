@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "fahrenheit_mixer",
+  "pattern": [
+    "R",
+    "K",
+    "#"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:bowl"
+    },
+    "R": {
+      "item": "minecraft:stick"
+    },
+    "K": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "item": "fahrenheit:mixer"
+  }
+}

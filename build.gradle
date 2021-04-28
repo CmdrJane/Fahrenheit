@@ -28,6 +28,11 @@ repositories {
 		url 'https://ladysnake.jfrog.io/artifactory/mods'
 	}
 }
+/*
+loom {
+	accessWidener = file("src/main/resources/fahrenheit.accessWidener")
+}
+ */
 
 dependencies {
 	// To change the versions see the gradle.properties file

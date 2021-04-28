@@ -8,8 +8,7 @@
     "MinecraftClientMixins",
     "PlayerEntityMixins",
     "PlayerManagerMixins",
-    "PotionItemMixins",
-    "SPIManagerMixinsAcc"
+    "PotionItemMixins"
   ],
   "client": [
     "InGameHudMixins"

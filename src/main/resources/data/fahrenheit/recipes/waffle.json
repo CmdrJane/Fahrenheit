@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "waffle",
+  "ingredients": [
+    {
+      "item": "fahrenheit:mixer",
+      "remainder": { "item": "fahrenheit:mixer" }
+    },
+    {
+      "item": "minecraft:milk_bucket"
+    },
+    {
+      "item": "minecraft:egg"
+    },
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "minecraft:wheat"
+    }
+  ],
+  "result": {
+    "item": "fahrenheit:waffle"
+  }
+}
