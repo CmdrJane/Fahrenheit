@@ -1,28 +1,28 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "group": "ice_cream",
+  "group": "ice_mix",
   "ingredients": [
     {
       "item": "fahrenheit:mixer",
       "remainder": { "item": "fahrenheit:mixer" }
     },
     {
-      "item": "minecraft:cocoa_beans"
+      "item": "minecraft:snow_block"
     },
     {
-      "item": "minecraft:sugar"
+      "item": "minecraft:packed_ice"
     },
     {
       "item": "minecraft:milk_bucket"
     },
     {
-      "item": "minecraft:snowball"
+      "item": "minecraft:sugar"
     },
     {
-      "item": "fahrenheit:waffle"
+      "item": "minecraft:glass_bottle"
     }
   ],
   "result": {
-    "item": "fahrenheit:ice_cream"
+    "item": "fahrenheit:ice_mix"
   }
 }
