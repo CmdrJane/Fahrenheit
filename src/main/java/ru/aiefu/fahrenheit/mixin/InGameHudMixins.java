@@ -33,7 +33,6 @@ public abstract class InGameHudMixins extends DrawableHelper {
 
     @Inject(method = "renderStatusBars", at = @At(value = "INVOKE", target = "net/minecraft/util/profiler/Profiler.pop()V"))
     private void renderFahrenheitTemp(MatrixStack matrices, CallbackInfo ci){
-        long l1 = System.nanoTime();
         this.client.getTextureManager().bindTexture(FahrenheitClient.HEAT_ICO);
         MinecraftClient mc = MinecraftClient.getInstance();
         Window win = mc.getWindow();
@@ -54,28 +53,29 @@ public abstract class InGameHudMixins extends DrawableHelper {
         int wh = playerEntity.isSubmergedIn(FluidTags.WATER) || ai < ah ? o - 20 : o - 10;
         int aa;
         //Render TempBar
-        for(int z = 0; z < 10; ++z) {
-            aa = m + z * 8;
-            //Full
-            if (-z * 2 - 1 > tp) {
-                drawTexture(matrices, aa, rq, 56, 3, 9, 9, 256, 128);
-            }
-            //Half
-            else if (-z * 2 - 1 == tp) {
-                drawTexture(matrices, aa, rq, 47, 3, 8, 9, 256, 128);
-            }
-            //Full
-            else if (z * 2 + 1 < tp && tp < 16) {
-                drawTexture(matrices, aa, rq, 20, 3, 9, 9, 256, 128);
-            }
-            //Half
-            else if (z * 2 + 1 == tp) {
-                drawTexture(matrices, aa, rq, 11, 3, 8, 9, 256, 128);
-            }
-            //Full
-            else if (z * 2 + 1 < tp && tp >= 16) {
-                drawTexture(matrices, aa, rq - 1, 3, 3, 8, 10, 256, 128);
-            }
+        if(FahrenheitClient.should_render_temp){
+            for(int z = 0; z < 10; ++z) {
+                aa = m + z * 8;
+                //Full
+                if (-z * 2 - 1 > tp) {
+                    drawTexture(matrices, aa, rq, 56, 3, 9, 9, 256, 128);
+                }
+                //Half
+                else if (-z * 2 - 1 == tp) {
+                    drawTexture(matrices, aa, rq, 47, 3, 8, 9, 256, 128);
+                }
+                //Full
+                else if (z * 2 + 1 < tp && tp < 16) {
+                    drawTexture(matrices, aa, rq, 20, 3, 9, 9, 256, 128);
+                }
+                //Half
+                else if (z * 2 + 1 == tp) {
+                    drawTexture(matrices, aa, rq, 11, 3, 8, 9, 256, 128);
+                }
+                //Full
+                else if (z * 2 + 1 < tp && tp >= 16) {
+                    drawTexture(matrices, aa, rq - 1, 3, 3, 8, 10, 256, 128);
+                }
             /*
             else if(-z * 2 - 1 > tp && tp <= -16){
                 drawTexture(matrices, aa, rq - 1, 67, 3, 8, 10, 256, 128);
@@ -85,25 +85,27 @@ public abstract class InGameHudMixins extends DrawableHelper {
                 drawTexture(matrices, aa, rq - 1, 3, 3, 8, 10, 256, 256);
             }
              */
+            }
         }
         //Render WaterBar
-        for(int z = 0; z < 10; ++z) {
-            aa = n - z * 8;
+        if(FahrenheitClient.should_render_thirst){
+            for(int z = 0; z < 10; ++z) {
+                aa = n - z * 8;
 
-            //Full
-            if (z * 2 + 1 < ws) {
-                drawTexture(matrices, aa, wh, 78, 3, 8, 9, 256, 128);
-            }
-            //Half
-            else if (z * 2 + 1 == ws) {
-                drawTexture(matrices, aa, wh, 88, 3, 8, 9, 256, 128);
-            }
-            //Empty
-            else if (z * 2 + 1 > ws) {
-                drawTexture(matrices, aa, wh, 98, 3, 8, 9, 256, 128);
+                //Full
+                if (z * 2 + 1 < ws) {
+                    drawTexture(matrices, aa, wh, 78, 3, 8, 9, 256, 128);
+                }
+                //Half
+                else if (z * 2 + 1 == ws) {
+                    drawTexture(matrices, aa, wh, 88, 3, 8, 9, 256, 128);
+                }
+                //Empty
+                else if (z * 2 + 1 > ws) {
+                    drawTexture(matrices, aa, wh, 98, 3, 8, 9, 256, 128);
+                }
             }
         }
         this.client.getTextureManager().bindTexture(DrawableHelper.GUI_ICONS_TEXTURE);
-        long l2 = System.nanoTime();
     }
 }

@@ -154,14 +154,18 @@ public class EnvironmentManager {
             }
 
             if(blWarm){
-                if(tmp < 0)
-                tmp = 0;
-                if(this.temp < 4)
-                tmp = 0.08F * precision;
+                if(this.temp <= 0 && tmp < 0)
+                    tmp = 0;
+                else if(this.temp > 6 && tmp > 0)
+                    tmp += 0.04F;
+                if(this.temp < -4)
+                    tmp = 0.08F * precision;
             }
             else if(blChill){
-                if(tmp > 0)
-                tmp = 0;
+                if(this.temp >= 0 && tmp > 0)
+                    tmp = 0;
+                else if(this.temp < -6 && tmp < 0)
+                    tmp -= 0.04F;
                 if(this.temp > 6)
                 tmp = -0.08F * precision;
             }
@@ -176,7 +180,7 @@ public class EnvironmentManager {
 
             Fahrenheit.sendSyncPacket((ServerPlayerEntity) player, this.temp, this.water);
             long endTime = System.nanoTime();
-            player.sendSystemMessage(new LiteralText("That took " + (endTime - startTime) + " nanos"), Util.NIL_UUID);
+            //player.sendSystemMessage(new LiteralText("That took " + (endTime - startTime) + " nanos"), Util.NIL_UUID);
             System.out.println(this.temp +"/" + this.tempProgress);
             System.out.println(this.water);
         }

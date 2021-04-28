@@ -8,7 +8,11 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
@@ -22,9 +26,13 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
+import ru.aiefu.fahrenheit.blocks.FermenterBlock;
+import ru.aiefu.fahrenheit.blocks.FermenterEntity;
 import ru.aiefu.fahrenheit.commands.DebugCommand;
 import ru.aiefu.fahrenheit.commands.FahrenheitReloadCfg;
 import ru.aiefu.fahrenheit.commands.GetDistanceTo;
+import ru.aiefu.fahrenheit.items.MagmaShard;
+import ru.aiefu.fahrenheit.items.IceCube;
 import ru.aiefu.fahrenheit.items.drinks.ItemDrinkable;
 import ru.aiefu.fahrenheit.items.drinks.WaterFlaskItem;
 import ru.aiefu.fahrenheit.items.food.IceCream;
@@ -65,15 +73,25 @@ public class Fahrenheit implements ModInitializer {
 	//Items
 	public static final Item WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 400);
 	public static final Item METAL_WATER_FLASK = new WaterFlaskItem(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(1), 800);
-	public static final Item APPLE_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(16),3,4,9,-2, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1200, 0}));
-	public static final Item MELON_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(16),4,6,9,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{2600, 0}));
-	public static final Item BERRIES_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),4,5,6,-4, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1800, 0}, StatusEffects.JUMP_BOOST, new int[]{400, 2}));
-	public static final Item CARROT_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),3,4,8,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1500, 0}, StatusEffects.NIGHT_VISION, new int[]{800, 0}));
+	public static final Item APPLE_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(16),3,4,9,-2, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1200, 0}), false);
+	public static final Item MELON_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(0).build()).maxCount(16),5,6,9,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{2600, 0}), false);
+	public static final Item BERRIES_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),4,5,6,-4, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1800, 0}, StatusEffects.JUMP_BOOST, new int[]{400, 2}), false);
+	public static final Item CARROT_JUICE_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().alwaysEdible().hunger(1).build()).maxCount(16),3,4,8,-3, new HashMapOf<>(REFRESHING_EFFECT, new int[]{1500, 0}, StatusEffects.NIGHT_VISION, new int[]{800, 0}),false);
+	public static final Item APPLE_CIDER_BOTTLE = new ItemDrinkable(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().hunger(0).alwaysEdible().build()).maxCount(16), 2, 2, -4, 4, null, true);
 	public static final Item ICE_CREAM = new IceCream(new FabricItemSettings().group(ItemGroup.FOOD).food(new FoodComponent.Builder().hunger(2).alwaysEdible().build()).maxCount(16),-4);
+	public static final Item ICE_CUBE = new IceCube(new FabricItemSettings().group(ItemGroup.COMBAT).maxCount(1));
+	public static final Item MAGMA_SHARD = new MagmaShard(new FabricItemSettings().group(ItemGroup.COMBAT).maxCount(1));
+	//Blocks
+	//public static final FermenterBlock FERMENTER_BLOCK = new FermenterBlock(FabricBlockSettings.of(Material.WOOD).strength(4.0f));
+	//BlockItems
+	//public static final BlockItem FERMENTER_ITEM = new BlockItem(FERMENTER_BLOCK, new FabricItemSettings().group(ItemGroup.MISC));
+	//BlockEntities
+	//public static final BlockEntityType<FermenterEntity> FERMENTER_BLOCK_ENTITY = BlockEntityType.Builder.create(FermenterEntity::new, FERMENTER_BLOCK).build(null);
 
 	@Override
 	public void onInitialize() {
 		craftPaths();
+		//Registry.register(Registry.BLOCK_ENTITY_TYPE, craftID("fermenter"), FERMENTER_BLOCK_ENTITY);
 		Registry.register(Registry.STATUS_EFFECT, craftID("warm"), WARM_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("chill"), CHILL_EFFECT);
 		Registry.register(Registry.STATUS_EFFECT, craftID("wet"), WET_EFFECT);
@@ -90,7 +108,11 @@ public class Fahrenheit implements ModInitializer {
 		Registry.register(Registry.ITEM, craftID("melon_juice_bottle"), MELON_JUICE_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("berries_juice_bottle"), BERRIES_JUICE_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("carrot_juice_bottle"), CARROT_JUICE_BOTTLE);
+		Registry.register(Registry.ITEM, craftID("apple_cider_bottle"), APPLE_CIDER_BOTTLE);
 		Registry.register(Registry.ITEM, craftID("ice_cream"), ICE_CREAM);
+		Registry.register(Registry.ITEM, craftID("ice_cube"), ICE_CUBE);
+		Registry.register(Registry.ITEM, craftID("magma_shard"), MAGMA_SHARD);
+		//Registry.register(Registry.ITEM, craftID("fermenter"), FERMENTER_ITEM);
 		TrinketSlots.addSlot(SlotGroups.LEGS, Slots.BELT, new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png"));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			GetDistanceTo.register(dispatcher);

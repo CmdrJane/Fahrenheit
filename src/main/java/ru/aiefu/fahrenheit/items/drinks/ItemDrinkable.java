@@ -29,13 +29,15 @@ public class ItemDrinkable extends Item {
     protected int tempThreshold;
     protected int tempLevel;
     protected HashMap<StatusEffect, int[]> effects;
-    public ItemDrinkable(Settings settings, int waterLevel, int hydration, int tempThreshold, int tempLevel, @Nullable HashMap<StatusEffect, int[]> effects) {
+    protected boolean shouldInverse;
+    public ItemDrinkable(Settings settings, int waterLevel, int hydration, int tempThreshold, int tempLevel, @Nullable HashMap<StatusEffect, int[]> effects, boolean shouldInverse) {
         super(settings);
         this.waterLevel = waterLevel;
         this.hydration = hydration;
         this.tempThreshold = tempThreshold;
         this.tempLevel = tempLevel;
         this.effects = effects;
+        this.shouldInverse = shouldInverse;
     }
 
     @Override
@@ -51,7 +53,10 @@ public class ItemDrinkable extends Item {
             ServerPlayerEntity player = (ServerPlayerEntity) user;
             EnvironmentManager manager = ((IPlayerMixins) user).getEnviroManager();
             manager.addWaterLevels(this.waterLevel, this.hydration);
-            if(manager.getTemp() >= this.tempThreshold) {
+            if(!shouldInverse && manager.getTemp() >= this.tempThreshold) {
+                manager.addTempLevel(tempLevel);
+            }
+            else if(shouldInverse && manager.getTemp() <= this.tempThreshold){
                 manager.addTempLevel(tempLevel);
             }
             stack.decrement(1);
